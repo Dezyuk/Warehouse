@@ -1,0 +1,41 @@
+﻿<Window x:Class="Warehouse.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Warehouse"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800">
+    <Grid>
+        <!-- Панель меню -->
+        <Menu DockPanel.Dock="Top">
+            <MenuItem Header="File">
+                <MenuItem Header="Exit" Click="Exit_Click"/>
+            </MenuItem>
+            <MenuItem Header="Help">
+                <MenuItem Header="About"/>
+            </MenuItem>
+        </Menu>
+
+        <!-- Основной контент -->
+        <TabControl>
+            <TabItem Header="Warehouse Overview">
+
+            </TabItem>
+            <TabItem Header="Products">
+                <DataGrid x:Name="ProductsGrid" AutoGenerateColumns="True" ItemsSource="{Binding Products}" />
+            </TabItem>
+            <TabItem Header="Orders">
+                <DataGrid ItemsSource="{Binding Orders}" AutoGenerateColumns="True" />
+            </TabItem>
+
+            <Button x:Name="ToggleModeButton" Content="Режим: Добавление" Click="ToggleModeButton_Click" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10"/>
+
+            <TabItem Header="Warehouse Overview">
+                <Canvas x:Name="WarehouseCanvas" Background="LightGray" MouseDown="WarehouseCanvas_MouseDown" MouseMove="WarehouseCanvas_MouseMove">
+                   
+                </Canvas>
+            </TabItem>
+        </TabControl>
+    </Grid>
+</Window>
