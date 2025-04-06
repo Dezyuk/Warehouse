@@ -1,23 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
+﻿using System.Windows;
 using Warehouse.ViewModels;
+using Warehouse.Models;
 
 namespace Warehouse.Views
 {
-    /// <summary>
-    /// Логика взаимодействия для ProductWindow.xaml
-    /// </summary>
     public partial class ProductWindow : Window
     {
         private readonly ProductViewModel _viewModel;
@@ -31,17 +17,45 @@ namespace Warehouse.Views
 
         private void AddProduct_Click(object sender, RoutedEventArgs e)
         {
-            // Логика для добавления товара
+            var newProduct = new Product
+            {
+                
+                Name = "Новый товар",
+                Article = "temp",
+                CategoryId = 0,
+                Quantity = 0,
+                MinimumStock = 0
+            };
+
+            _viewModel.AddProduct(newProduct);
         }
 
         private void EditProduct_Click(object sender, RoutedEventArgs e)
         {
-            // Логика для редактирования товара
+            if (ProductsGrid.SelectedItem is Product selectedProduct)
+            {
+                var editWindow = new EditProductWindow(selectedProduct);
+                if (editWindow.ShowDialog() == true)
+                {
+                    _viewModel.EditProduct(selectedProduct);
+                }
+            }
+            else
+            {
+                MessageBox.Show("Выберите товар для редактирования.");
+            }
         }
 
         private void DeleteProduct_Click(object sender, RoutedEventArgs e)
         {
-            // Логика для удаления товара
+            if (ProductsGrid.SelectedItem is Product selectedProduct)
+            {
+                _viewModel.DeleteProduct(selectedProduct);
+            }
+            else
+            {
+                MessageBox.Show("Выберите товар для удаления.");
+            }
         }
     }
 }

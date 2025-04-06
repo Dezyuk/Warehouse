@@ -1,6 +1,4 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using System.Configuration;
-using System.Data;
 using System.Windows;
 using Warehouse.Data.Repositories;
 using Warehouse.Data;
@@ -8,59 +6,52 @@ using Warehouse.Services;
 using Warehouse.ViewModels;
 using Warehouse.Views;
 
-namespace Warehouse;
-
-/// <summary>
-/// Interaction logic for App.xaml
-/// </summary>
-public partial class App : Application
+namespace Warehouse
 {
-    private readonly ServiceProvider _serviceProvider;
-
-    public App()
+    public partial class App : Application
     {
-        var services = new ServiceCollection();
-        ConfigureServices(services);
-        _serviceProvider = services.BuildServiceProvider();
-    }
+        private readonly ServiceProvider _serviceProvider;
 
-    private void ConfigureServices(IServiceCollection services)
-    {
-        services.AddDbContext<WarehouseContext>();
+        public App()
+        {
+            var services = new ServiceCollection();
+            ConfigureServices(services);
+            _serviceProvider = services.BuildServiceProvider();
+        }
 
-        // Регистрация репозиториев
-        services.AddScoped<IProductRepository, ProductRepository>();
-        services.AddScoped<IWarehouseZoneRepository, WarehouseZoneRepository>();
-        services.AddScoped<ICellRepository, CellRepository>();
-        services.AddScoped<IOrderRepository, OrderRepository>();
+        private void ConfigureServices(IServiceCollection services)
+        {
+            services.AddDbContext<WarehouseContext>();
 
-        // Регистрация сервисов
-        services.AddScoped<IProductService, ProductService>();
-        services.AddScoped<IWarehouseZoneService, WarehouseZoneService>();
-        services.AddScoped<ICellService, CellService>();
-        services.AddScoped<IOrderService, OrderService>();
+            // Регистрация репозиториев
+            services.AddScoped<IProductRepository, ProductRepository>();
+            services.AddScoped<IWarehouseZoneRepository, WarehouseZoneRepository>();
+            services.AddScoped<ICellRepository, CellRepository>();
+            services.AddScoped<IOrderRepository, OrderRepository>();
 
-        // Регистрация ViewModel
-        services.AddTransient<ProductViewModel>();
-        //services.AddTransient<WarehouseZoneViewModel>();
-        //services.AddTransient<CellViewModel>();
-        services.AddTransient<OrderViewModel>();
+            // Регистрация сервисов
+            services.AddScoped<IProductService, ProductService>();
+            services.AddScoped<IWarehouseZoneService, WarehouseZoneService>();
+            services.AddScoped<ICellService, CellService>();
+            services.AddScoped<IOrderService, OrderService>();
 
-        // Регистрация окон
-        services.AddTransient<MainWindow>();
+            // Регистрация ViewModel
+            services.AddTransient<WarehouseViewModel>();
+            services.AddTransient<ProductViewModel>();
+            services.AddTransient<OrderViewModel>();
 
-        //services.AddScoped<IOrderRepository, OrderRepository>();
-        //services.AddScoped<IOrderService, OrderService>();
-        //services.AddTransient<OrderViewModel>();
-        //services.AddTransient<OrdersWindow>();
-    }
+            // Регистрация окон
+            services.AddTransient<MainWindow>();
+            services.AddTransient<OrdersWindow>();
+            services.AddTransient<ProductWindow>();
+        }
 
-    protected override void OnStartup(StartupEventArgs e)
-    {
-        var ordersWindow = _serviceProvider.GetService<OrdersWindow>();
-        ordersWindow?.Show();
-        base.OnStartup(e);
+        protected override void OnStartup(StartupEventArgs e)
+        {
+            base.OnStartup(e);
+
+            var mainWindow = _serviceProvider.GetService<MainWindow>();
+            mainWindow?.Show();
+        }
     }
 }
-
-

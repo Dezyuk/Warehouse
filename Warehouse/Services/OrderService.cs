@@ -22,7 +22,7 @@ namespace Warehouse.Services
             return _orderRepository.GetAllOrders();
         }
 
-        public Order GetOrderById(int id)
+        public Order? GetOrderById(int id)
         {
             return _orderRepository.GetOrderById(id);
         }

@@ -7,10 +7,9 @@ using Warehouse.Models;
 
 namespace Warehouse.Data.Repositories
 {
+    //Юзлес
     interface IWarehouseZoneRepository
     {
-        IEnumerable<WarehouseZone> GetAllWarehouseZones();
-        WarehouseZone GetWarehouseZoneById(int id);
         void AddWarehouseZone(WarehouseZone warehouseZone);
         void UpdateWarehouseZone(WarehouseZone warehouseZone);
         void DeleteWarehouseZone(int id);

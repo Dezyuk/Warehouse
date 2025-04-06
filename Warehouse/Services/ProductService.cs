@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using Warehouse.Data.Repositories;
 using Warehouse.Models;
 
@@ -22,7 +18,7 @@ namespace Warehouse.Services
             return _productRepository.GetAllProducts();
         }
 
-        public Product GetProductById(int id)
+        public Product? GetProductById(int id)
         {
             return _productRepository.GetProductById(id);
         }

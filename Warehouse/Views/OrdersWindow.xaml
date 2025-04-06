@@ -5,8 +5,19 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Warehouse.Views"
         mc:Ignorable="d"
-        Title="OrdersWindow" Height="450" Width="800">
-    <Grid>
-        <DataGrid x:Name="OrdersGrid" AutoGenerateColumns="True" />
+        Title="Управление заказами" Height="450" Width="800">
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,0,0,10">
+            <Button Content="Добавить заказ" Click="AddOrder_Click" Margin="5"/>
+            <Button Content="Редактировать заказ" Click="EditOrder_Click" Margin="5"/>
+            <Button Content="Удалить заказ" Click="DeleteOrder_Click" Margin="5"/>
+        </StackPanel>
+
+        <DataGrid x:Name="OrdersGrid" Grid.Row="1" AutoGenerateColumns="True" ItemsSource="{Binding Orders}"/>
     </Grid>
 </Window>

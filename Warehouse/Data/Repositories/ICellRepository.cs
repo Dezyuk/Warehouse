@@ -10,7 +10,8 @@ namespace Warehouse.Data.Repositories
     public interface ICellRepository
     {
         IEnumerable<Cell> GetAllCells();
-        Cell GetCellById(int id);
+        Cell? GetCellById(int id);
+        Cell? GetCellByProduct(int id);
         void AddCell(Cell cell);
         void UpdateCell(Cell cell);
         void DeleteCell(int id);

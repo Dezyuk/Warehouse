@@ -1,8 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using Warehouse.Data;
 using Warehouse.Models;
 
 namespace Warehouse.Data.Repositories
@@ -21,7 +20,7 @@ namespace Warehouse.Data.Repositories
             return _context.Products.ToList();
         }
 
-        public Product GetProductById(int id)
+        public Product? GetProductById(int id)
         {
             return _context.Products.Find(id);
         }
@@ -37,10 +36,11 @@ namespace Warehouse.Data.Repositories
             _context.Products.Update(product);
             _context.SaveChanges();
         }
+
         public void DeleteProduct(int id)
         {
             var product = _context.Products.Find(id);
-            if(product is not null)
+            if (product != null)
             {
                 _context.Products.Remove(product);
                 _context.SaveChanges();

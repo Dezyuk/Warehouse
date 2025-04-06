@@ -8,6 +8,7 @@ using Warehouse.Models;
 
 namespace Warehouse.Data.Repositories
 {
+    //Юзлес
     class WarehouseZoneRepository : IWarehouseZoneRepository
     {
         private readonly WarehouseContext _context;

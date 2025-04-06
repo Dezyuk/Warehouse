@@ -8,7 +8,7 @@ using Warehouse.Models;
 
 namespace Warehouse.Services
 {
-    class CellService : ICellService
+    public class CellService : ICellService
     {
         private readonly ICellRepository _cellRepository;
 
@@ -21,10 +21,13 @@ namespace Warehouse.Services
         {
             return _cellRepository.GetAllCells();
         }
-
-        public Cell GetCellById(int id)
+        public Cell? GetCellById(int id)
         {
             return _cellRepository.GetCellById(id);
+        }
+        public Cell? GetCellByProduct(int id)
+        {
+            return _cellRepository.GetCellByProduct(id);
         }
 
         public void AddCell(Cell cell)

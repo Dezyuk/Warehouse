@@ -1,9 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using Warehouse.Data;
 using Warehouse.Models;
 
@@ -20,12 +17,16 @@ namespace Warehouse.Data.Repositories
 
         public IEnumerable<Order> GetAllOrders()
         {
-            return _context.Orders.Include(o => o.Products).ToList();
+            return _context.Orders.Include(o => o.OrderProducts)
+                                  .ThenInclude(op => op.Product)
+                                  .ToList();
         }
 
-        public Order GetOrderById(int id)
+        public Order? GetOrderById(int id)
         {
-            return _context.Orders.Include(o => o.Products).FirstOrDefault(o => o.Id == id);
+            return _context.Orders.Include(o => o.OrderProducts)
+                                  .ThenInclude(op => op.Product)
+                                  .FirstOrDefault(o => o.Id == id);
         }
 
         public void AddOrder(Order order)

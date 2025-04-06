@@ -11,10 +11,8 @@ namespace Warehouse.Models
         public int Id { get; set; }
         public int X { get; set; }
         public int Y { get; set; }
-        public bool IsOccupied { get; set; }
-        public int WarehouseZoneId { get; set; }
+        public ZoneType WarehouseZoneType { get; set; }
+        public Product? Product { get; set; }
         public int? ProductId { get; set; }
-        public WarehouseZone? WarehouseZone { get; set; } 
-        public Product? Product { get; set; } 
     }
 }

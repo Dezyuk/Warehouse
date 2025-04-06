@@ -3,39 +3,48 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:Warehouse"
+        xmlns:local="clr-namespace:Warehouse.Views"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="Складской Менеджер" Height="600" Width="1000">
+
     <Grid>
-        <!-- Панель меню -->
+        <!-- Главное меню -->
         <Menu DockPanel.Dock="Top">
-            <MenuItem Header="File">
-                <MenuItem Header="Exit" Click="Exit_Click"/>
+            <MenuItem Header="Файл">
+                <MenuItem Header="Выход" Click="Exit_Click"/>
             </MenuItem>
-            <MenuItem Header="Help">
-                <MenuItem Header="About"/>
+            <MenuItem Header="Справка">
+                <MenuItem Header="О программе"/>
             </MenuItem>
         </Menu>
 
-        <!-- Основной контент -->
-        <TabControl>
-            <TabItem Header="Warehouse Overview">
+        <!-- Основное содержимое -->
+        <Grid Margin="10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="200"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
 
-            </TabItem>
-            <TabItem Header="Products">
-                <DataGrid x:Name="ProductsGrid" AutoGenerateColumns="True" ItemsSource="{Binding Products}" />
-            </TabItem>
-            <TabItem Header="Orders">
-                <DataGrid ItemsSource="{Binding Orders}" AutoGenerateColumns="True" />
-            </TabItem>
+            <!-- Панель управления -->
+            <StackPanel Grid.Column="0" Background="LightGray"  Margin="0,0,10,0">
+                <TextBlock Text="Управление складом" FontSize="16" FontWeight="Bold" Margin="0,0,0,10"/>
 
-            <Button x:Name="ToggleModeButton" Content="Режим: Добавление" Click="ToggleModeButton_Click" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10"/>
+                <Button x:Name="ToggleModeButton" Content="Режим: Добавление" Click="ToggleModeButton_Click" Margin="0,5"/>
+                <Button Content="Обновить склад" Click="RefreshWarehouse_Click" Margin="0,5"/>
 
-            <TabItem Header="Warehouse Overview">
-                <Canvas x:Name="WarehouseCanvas" Background="LightGray" MouseDown="WarehouseCanvas_MouseDown" MouseMove="WarehouseCanvas_MouseMove">
-                   
-                </Canvas>
-            </TabItem>
-        </TabControl>
+                <Separator Margin="0,10"/>
+
+                <TextBlock Text="Управление продуктами" FontSize="14" FontWeight="Bold" Margin="0,10,0,5"/>
+                <Button Content="Товары" Click="OpenProductsWindow_Click" Margin="0,5"/>
+                <Button Content="Заказы" Click="OpenOrdersWindow_Click" Margin="0,5"/>
+            </StackPanel>
+
+            <!-- Область склада -->
+            <Border Grid.Column="1" BorderThickness="1" BorderBrush="Black">
+                <ScrollViewer>
+                    <Canvas x:Name="WarehouseCanvas" Background="White" MouseDown="WarehouseCanvas_MouseDown"/>
+                </ScrollViewer>
+            </Border>
+        </Grid>
     </Grid>
 </Window>

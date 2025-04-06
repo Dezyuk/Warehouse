@@ -8,8 +8,17 @@ namespace Warehouse.Models
 {
     public class WarehouseZone
     {
-        public int Id { get; set; }
-        public string Name { get; set; } = string.Empty;
-        public List<Cell> Cells { get; set; } = new List<Cell>();
+        public List<Cell> Cells { get; }
+
+        public WarehouseZone(IEnumerable<Cell> cells)
+        {
+            Cells = cells.ToList();
+        }
+
+        public List<Cell> GetCellsByType(ZoneType type)
+        {
+            return Cells.Where(c => c.WarehouseZoneType == type).ToList();
+        }
+        //public List<Cell> Cells { get; set; } = new List<Cell>();
     }
 }

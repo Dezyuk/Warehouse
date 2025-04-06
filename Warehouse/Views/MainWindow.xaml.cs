@@ -1,30 +1,79 @@
-﻿using System.Windows;
-using Warehouse.ViewModels;
-using Warehouse.Services;
-using Warehouse.Services;
-using Warehouse.ViewModels;
-using System.Windows.Shapes;
-using System.Windows.Media;
+﻿using System.Linq;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Shapes;
 using Warehouse.Models;
-using Warehouse.Data.Repositories;
+using Warehouse.Services;
+using Warehouse.ViewModels;
 
 namespace Warehouse.Views
 {
     public partial class MainWindow : Window
     {
-        private WarehouseZone _warehouseZone = new WarehouseZone();
+        private readonly WarehouseViewModel _viewModel;
+        private readonly ProductViewModel _productViewModel;
+        private readonly OrderViewModel _orderViewModel;
+        private bool _isDeleteMode = false;
         public MainWindow()
         {
             InitializeComponent();
+        }
+        public MainWindow(WarehouseViewModel viewModel, ProductViewModel productViewModel, OrderViewModel orderViewModel)
+        {
+            InitializeComponent();
+            _viewModel = viewModel;
+            _productViewModel = productViewModel;
+            _orderViewModel = orderViewModel;
 
-            //var productRepository = new ProductRepository();
-            //var productService = new ProductService(productRepository);
-            //var productViewModel = new ProductViewModel(productService);
+            DataContext = _viewModel;
 
-            //DataContext = productViewModel;
+            RenderWarehouse();
+        }
 
+        private void ToggleModeButton_Click(object sender, RoutedEventArgs e)
+        {
+            _isDeleteMode = !_isDeleteMode;
+            ToggleModeButton.Content = _isDeleteMode ? "Режим: Удаление" : "Режим: Добавление";
+        }
+
+        private void RefreshWarehouse_Click(object sender, RoutedEventArgs e)
+        {
+            RenderWarehouse();
+        }
+
+        private void OpenProductsWindow_Click(object sender, RoutedEventArgs e)
+        {
+            var productWindow = new ProductWindow(_productViewModel);
+            productWindow.Show();
+        }
+
+        private void OpenOrdersWindow_Click(object sender, RoutedEventArgs e)
+        {
+            var ordersWindow = new OrdersWindow(_orderViewModel);
+            ordersWindow.Show();
+        }
+
+        private void WarehouseCanvas_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            var point = e.GetPosition(WarehouseCanvas);
+            int x = (int)(point.X / 30);
+            int y = (int)(point.Y / 30);
+
+            if (_isDeleteMode)
+            {
+                DeleteCell(x, y);
+            }
+            else
+            {
+                AddCell(x, y);
+            }
+        }
+
+        private void AddCell(int x, int y)
+        {
+            if (!_viewModel.HasNeighbor(x, y)) return;
 
             var cell = new Rectangle
             {
@@ -35,131 +84,50 @@ namespace Warehouse.Views
                 StrokeThickness = 1
             };
 
-            Canvas.SetLeft(cell, 0);
-            Canvas.SetTop(cell, 0);
-
+            Canvas.SetLeft(cell, x * 30);
+            Canvas.SetTop(cell, y * 30);
             WarehouseCanvas.Children.Add(cell);
-            _warehouseZone.Cells.Add(new Cell
-            {
-                X = 1,
-                Y = 1,
-                IsOccupied = false
-            });
 
+            _viewModel.AddCell(x, y);
         }
-        private void WarehouseCanvas_MouseDown(object sender, MouseButtonEventArgs e)
+
+        private void DeleteCell(int x, int y)
         {
-            if (e.ChangedButton == MouseButton.Left && _isDeleteMode) // Режим удаления
+            var cell = WarehouseCanvas.Children
+                .OfType<Rectangle>()
+                .FirstOrDefault(c => Canvas.GetLeft(c) == x * 30 && Canvas.GetTop(c) == y * 30);
+
+            if (cell != null)
             {
-
-                //var cell = new Rectangle
-                //{
-                //    Width = 30,
-                //    Height = 30,
-                //    Fill = Brushes.Red,
-                //    Stroke = Brushes.Black,
-                //    StrokeThickness = 1
-                //};
-
-                //Canvas.SetLeft(cell, 300);
-                //Canvas.SetTop(cell,  300);
-
-
-                var point = e.GetPosition(WarehouseCanvas);
-                int x = (int)(point.X / 30);
-                int y = (int)(point.Y / 30);
-                var element = e.Source as Rectangle;
-
-                if (element != null)
-                {
-                    //_warehouseZone.Cells.Remove(_warehouseZone.Cells.First(c => c.X == x && c.Y == y));// Не работает весь метод(
-                    WarehouseCanvas.Children.Remove(element);
-                }
-            }
-            else if (e.ChangedButton == MouseButton.Left) // Режим добавления
-            {
-                var point = e.GetPosition(WarehouseCanvas);
-                int x = (int)(point.X / 30);
-                int y = (int)(point.Y / 30);
-
-                if (HasNeighbor(x, y))
-                {
-                    var cell = new Rectangle
-                    {
-                        Width = 30,
-                        Height = 30,
-                        Fill = Brushes.LightBlue,
-                        Stroke = Brushes.Black,
-                        StrokeThickness = 1
-                    };
-
-                    Canvas.SetLeft(cell, x * 30);
-                    Canvas.SetTop(cell, y * 30);
-
-                    WarehouseCanvas.Children.Add(cell);
-
-                    _warehouseZone.Cells.Add(new Cell
-                    {
-                        X = x,
-                        Y = y,
-                        IsOccupied = false
-                    });
-                }
+                WarehouseCanvas.Children.Remove(cell);
+                _viewModel.RemoveCell(x, y);
             }
         }
-        private bool HasNeighbor(int x, int y)
+
+        private void RenderWarehouse()
         {
-            return _warehouseZone.Cells.Any(c =>
-                (c.X == x - 1 && c.Y == y) || 
-                (c.X == x + 1 && c.Y == y) || 
-                (c.X == x && c.Y == y - 1) || 
-                (c.X == x && c.Y == y + 1));  
+            WarehouseCanvas.Children.Clear();
+
+            foreach (var cell in _viewModel.Cells)
+            {
+                var rectangle = new Rectangle
+                {
+                    Width = 30,
+                    Height = 30,
+                    Fill = Brushes.LightBlue,
+                    Stroke = Brushes.Black,
+                    StrokeThickness = 1
+                };
+
+                Canvas.SetLeft(rectangle, cell.X * 30);
+                Canvas.SetTop(rectangle, cell.Y * 30);
+                WarehouseCanvas.Children.Add(rectangle);
+            }
         }
 
-        private bool _isDeleteMode = false; 
-
-        private void ToggleModeButton_Click(object sender, RoutedEventArgs e)
-        {
-            _isDeleteMode = !_isDeleteMode; // Переключаем режим
-            ToggleModeButton.Content = _isDeleteMode ? "Режим: Удаление" : "Режим: Добавление";
-        }
         private void Exit_Click(object sender, RoutedEventArgs e)
         {
             Application.Current.Shutdown();
-        }
-
-        private void WarehouseCanvas_MouseMove(object sender, MouseEventArgs e)
-        {
-            if (e.LeftButton == MouseButtonState.Pressed && !_isDeleteMode) 
-            {
-                var point = e.GetPosition(WarehouseCanvas);
-                int x = (int)(point.X / 30);
-                int y = (int)(point.Y / 30);
-
-                if (HasNeighbor(x, y))
-                {
-                    var cell = new Rectangle
-                    {
-                        Width = 30,
-                        Height = 30,
-                        Fill = Brushes.LightBlue,
-                        Stroke = Brushes.Black,
-                        StrokeThickness = 1
-                    };
-
-                    Canvas.SetLeft(cell, x * 30);
-                    Canvas.SetTop(cell, y * 30);
-
-                    WarehouseCanvas.Children.Add(cell);
-
-                    _warehouseZone.Cells.Add(new Cell
-                    {
-                        X = x,
-                        Y = y,
-                        IsOccupied = false
-                    });
-                }
-            }
         }
     }
 }

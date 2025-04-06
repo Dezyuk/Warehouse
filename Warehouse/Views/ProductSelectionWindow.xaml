@@ -1,0 +1,26 @@
+﻿<Window x:Class="Warehouse.Views.ProductSelectionWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Warehouse.Views"
+        mc:Ignorable="d"
+        Title="ProductSelectionWindow" Height="400" Width="600">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <!-- DataGrid для отображения списка продуктов -->
+        <ListBox x:Name="ProductList"
+                 ItemsSource="{Binding Products}"
+                 DisplayMemberPath="Name"
+                 MouseDoubleClick="ProductList_MouseDoubleClick"
+                 Margin="10" />
+        <!-- Кнопки OK/Отмена -->
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="5">
+            <Button Content="OK" Width="80" Margin="5" Click="Ok_Click" IsDefault="True"/>
+            <Button Content="Отмена" Width="80" Margin="5" Click="Cancel_Click" IsCancel="True"/>
+        </StackPanel>
+    </Grid>
+</Window>
