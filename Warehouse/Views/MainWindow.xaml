@@ -1,50 +1,17 @@
 ﻿<Window x:Class="Warehouse.Views.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:Warehouse.Views"
-        mc:Ignorable="d"
-        Title="Складской Менеджер" Height="600" Width="1000">
-
-    <Grid>
-        <!-- Главное меню -->
-        <Menu DockPanel.Dock="Top">
-            <MenuItem Header="Файл">
-                <MenuItem Header="Выход" Click="Exit_Click"/>
-            </MenuItem>
-            <MenuItem Header="Справка">
-                <MenuItem Header="О программе"/>
-            </MenuItem>
-        </Menu>
-
-        <!-- Основное содержимое -->
-        <Grid Margin="10">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="200"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
-
-            <!-- Панель управления -->
-            <StackPanel Grid.Column="0" Background="LightGray"  Margin="0,0,10,0">
-                <TextBlock Text="Управление складом" FontSize="16" FontWeight="Bold" Margin="0,0,0,10"/>
-
-                <Button x:Name="ToggleModeButton" Content="Режим: Добавление" Click="ToggleModeButton_Click" Margin="0,5"/>
-                <Button Content="Обновить склад" Click="RefreshWarehouse_Click" Margin="0,5"/>
-
-                <Separator Margin="0,10"/>
-
-                <TextBlock Text="Управление продуктами" FontSize="14" FontWeight="Bold" Margin="0,10,0,5"/>
-                <Button Content="Товары" Click="OpenProductsWindow_Click" Margin="0,5"/>
-                <Button Content="Заказы" Click="OpenOrdersWindow_Click" Margin="0,5"/>
-            </StackPanel>
-
-            <!-- Область склада -->
-            <Border Grid.Column="1" BorderThickness="1" BorderBrush="Black">
-                <ScrollViewer>
-                    <Canvas x:Name="WarehouseCanvas" Background="White" MouseDown="WarehouseCanvas_MouseDown"/>
-                </ScrollViewer>
-            </Border>
-        </Grid>
-    </Grid>
+        xmlns:vm="clr-namespace:Warehouse.ViewModels"
+        Title="Складская система" Height="600" Width="1000">
+    <DockPanel>
+        <!-- Панель навигации -->
+        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Background="LightGray" Height="50">
+            <Button Content="Товары" Width="120" Margin="5" Command="{Binding ShowProductsCommand}" />
+            <Button Content="Приход" Width="120" Margin="5" Command="{Binding ShowInboundCommand}" />
+            <Button Content="Расход" Width="120" Margin="5" Command="{Binding ShowOutboundCommand}" />
+            <Button Content="Топология" Width="120" Margin="5" Command="{Binding ShowTopologyCommand}" />
+        </StackPanel>
+        <!-- Область отображения текущего модуля -->
+        <ContentControl Content="{Binding CurrentView}" />
+    </DockPanel>
 </Window>

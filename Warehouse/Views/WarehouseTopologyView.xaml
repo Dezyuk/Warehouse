@@ -1,0 +1,17 @@
+﻿<UserControl x:Class="Warehouse.Views.WarehouseTopologyView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             >
+    <DockPanel Margin="10">
+        <!-- Панель управления топологией -->
+        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,10">
+            <Button Content="Добавить ячейку" Click="AddCell_Click" Margin="5"/>
+            <Button Content="Удалить ячейку" Click="DeleteCell_Click" Margin="5"/>
+        </StackPanel>
+        <!-- Основное окно топологии (Canvas) -->
+        <Canvas x:Name="WarehouseCanvas" Background="LightGray" AllowDrop="True"
+                MouseDown="WarehouseCanvas_MouseDown" Drop="WarehouseCanvas_Drop"/>
+        <!-- Панель товаров без ячеек -->
+        <!-- (Можно реализовать как отдельный ListBox) -->
+    </DockPanel>
+</UserControl>

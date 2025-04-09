@@ -1,16 +1,15 @@
-﻿using System.Windows;
-using Warehouse.Models;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
+using System.Windows;
 using System.Windows.Input;
+using Warehouse.Models;
 using Warehouse.Services;
 
 namespace Warehouse.Views
 {
     public partial class ProductSelectionWindow : Window
     {
-        public ObservableCollection<Product> Products { get; set; } = new();
         private readonly IProductService _productService;
+        public ObservableCollection<Product> Products { get; set; } = new ObservableCollection<Product>();
 
         public Product? SelectedProduct { get; private set; }
 
@@ -31,20 +30,34 @@ namespace Warehouse.Views
             }
         }
 
-        private void ProductList_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        private void ProductsList_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            if (ProductList.SelectedItem is Product product)
+            if (ProductsList.SelectedItem is Product product)
             {
                 SelectedProduct = product;
                 DialogResult = true;
                 Close();
             }
         }
-        
+
+        private void Ok_Click(object sender, RoutedEventArgs e)
+        {
+            if (ProductsList.SelectedItem is Product product)
+            {
+                SelectedProduct = product;
+                DialogResult = true;
+                Close();
+            }
+            else
+            {
+                MessageBox.Show("Выберите товар.");
+            }
+        }
 
         private void Cancel_Click(object sender, RoutedEventArgs e)
         {
             DialogResult = false;
+            Close();
         }
     }
 }

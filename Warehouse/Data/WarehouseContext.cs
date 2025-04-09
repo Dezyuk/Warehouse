@@ -11,7 +11,14 @@ namespace Warehouse.Data
         public DbSet<Product> Products { get; set; }
 
         public WarehouseContext(DbContextOptions<WarehouseContext> options) : base(options) { }
-
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            if (!optionsBuilder.IsConfigured)
+            {
+                optionsBuilder.UseNpgsql("Host=localhost;Port=5432;Database=Warehouse_DB;Username=postgres;Password=123456");
+            }
+            base.OnConfiguring(optionsBuilder);
+        }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             // Настройка связи между Order и Product через OrderProduct

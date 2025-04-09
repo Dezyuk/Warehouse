@@ -33,6 +33,12 @@ namespace Warehouse.Data.Repositories
 
         public void UpdateProduct(Product product)
         {
+            var localProduct = _context.Products.Local.FirstOrDefault(p => p.Id == product.Id);
+            if (localProduct != null)
+            {
+                _context.Entry(localProduct).State = EntityState.Detached;
+            }
+
             _context.Products.Update(product);
             _context.SaveChanges();
         }

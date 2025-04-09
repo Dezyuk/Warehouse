@@ -5,7 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Warehouse.Views"
         mc:Ignorable="d"
-        Title="OrderProductEditWindow" Height="450" Width="800">
+        Title="Указать количество" Height="200" Width="400"
+        WindowStartupLocation="CenterOwner">
     <Grid Margin="10">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -13,13 +14,14 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Text="Продукт:" />
-        <TextBlock x:Name="ProductNameTextBlock" Grid.Row="1" FontWeight="Bold" Margin="0,5,0,10"/>
+        <TextBlock Grid.Row="0" Text="Выбранный товар:" FontWeight="Bold"/>
+        <TextBlock Grid.Row="1" x:Name="ProductNameText" Margin="0,5,0,10" FontSize="16"/>
 
         <StackPanel Grid.Row="2" Orientation="Horizontal" VerticalAlignment="Center">
-            <TextBlock Text="Количество:" VerticalAlignment="Center"/>
-            <TextBox x:Name="QuantityTextBox" Width="100" Margin="10,0,0,0"/>
-            <Button Content="ОК" Width="60" Margin="10,0,0,0" Click="ConfirmButton_Click"/>
+            <TextBlock Text="Количество:" VerticalAlignment="Center" Margin="0,0,5,0"/>
+            <TextBox x:Name="QuantityTextBox" Width="100" Margin="0,0,10,0"/>
+            <Button Content="OK" Width="80" Margin="5" Click="Confirm_Click"/>
+            <Button Content="Отмена" Width="80" Margin="5" Click="Cancel_Click"/>
         </StackPanel>
     </Grid>
 </Window>

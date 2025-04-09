@@ -5,11 +5,14 @@ using Warehouse.Data;
 using Warehouse.Services;
 using Warehouse.ViewModels;
 using Warehouse.Views;
+using Microsoft.EntityFrameworkCore;
 
 namespace Warehouse
 {
     public partial class App : Application
     {
+        public static ServiceProvider ServiceProvider { get; private set; }
+
         private readonly ServiceProvider _serviceProvider;
 
         public App()
@@ -21,29 +24,42 @@ namespace Warehouse
 
         private void ConfigureServices(IServiceCollection services)
         {
+            //services.AddDbContext<WarehouseContext>(options =>
+            //    options.UseNpgsql("Host=localhost;Port=5432;Database=Warehouse_DB;Username=postgres;Password=123456"));
+
             services.AddDbContext<WarehouseContext>();
 
             // Регистрация репозиториев
             services.AddScoped<IProductRepository, ProductRepository>();
-            services.AddScoped<IWarehouseZoneRepository, WarehouseZoneRepository>();
             services.AddScoped<ICellRepository, CellRepository>();
             services.AddScoped<IOrderRepository, OrderRepository>();
+            services.AddScoped<IOrderProductRepository, OrderProductRepository>();
 
             // Регистрация сервисов
             services.AddScoped<IProductService, ProductService>();
-            services.AddScoped<IWarehouseZoneService, WarehouseZoneService>();
             services.AddScoped<ICellService, CellService>();
             services.AddScoped<IOrderService, OrderService>();
+            services.AddScoped<IOrderProductService, OrderProductService>();
 
             // Регистрация ViewModel
-            services.AddTransient<WarehouseViewModel>();
-            services.AddTransient<ProductViewModel>();
-            services.AddTransient<OrderViewModel>();
+            services.AddSingleton<ProductViewModel>();
+            services.AddSingleton<OrderViewModel>();
+            services.AddSingleton<OutboundInvoiceViewModel>();
+            
+            services.AddSingleton<InboundInvoiceViewModel>();
+            services.AddSingleton<MainViewModel>();
 
-            // Регистрация окон
-            services.AddTransient<MainWindow>();
-            services.AddTransient<OrdersWindow>();
-            services.AddTransient<ProductWindow>();
+            // Регистрация окон / UserControl-ов
+            services.AddSingleton<MainWindow>();
+            services.AddSingleton<InboundInvoiceView>();
+            services.AddSingleton<OutboundInvoiceView>();
+            services.AddSingleton<ProductView>();
+            services.AddSingleton<WarehouseTopologyView>();
+            
+
+
+
+
         }
 
         protected override void OnStartup(StartupEventArgs e)

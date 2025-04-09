@@ -93,28 +93,28 @@ namespace Warehouse.ViewModels
                 return;
 
             // Открываем окно выбора продукта.
-            var productSelectionWindow = new ProductSelectionWindow();
-            if (productSelectionWindow.ShowDialog() == true)
-            {
-                Product selectedProduct = productSelectionWindow.SelectedProduct;
-                if (selectedProduct != null)
-                {
-                    // Открываем окно ввода данных для OrderProduct (например, количество, скидку).
-                    var orderProductEditWindow = new OrderProductEditWindow(selectedProduct);
-                    if (orderProductEditWindow.ShowDialog() == true)
-                    {
-                        // Получаем созданный объект OrderProduct.
-                        OrderProduct op = orderProductEditWindow.OrderProduct;
+            //var productSelectionWindow = new ProductSelectionWindow();
+            //if (productSelectionWindow.ShowDialog() == true)
+            //{
+            //    Product selectedProduct = productSelectionWindow.SelectedProduct;
+            //    if (selectedProduct != null)
+            //    {
+            //        // Открываем окно ввода данных для OrderProduct (например, количество, скидку).
+            //        var orderProductEditWindow = new OrderProductEditWindow(selectedProduct);
+            //        if (orderProductEditWindow.ShowDialog() == true)
+            //        {
+            //            // Получаем созданный объект OrderProduct.
+            //            OrderProduct op = orderProductEditWindow.OrderProduct;
 
-                        // Если заказ уже содержит продукт с таким ProductId, можно обновить количество.
-                        // В данном примере просто добавляем новый объект.
-                        SelectedOrder.OrderProducts.Add(op);
+            //            // Если заказ уже содержит продукт с таким ProductId, можно обновить количество.
+            //            // В данном примере просто добавляем новый объект.
+            //            SelectedOrder.OrderProducts.Add(op);
 
-                        // Обновляем состояние, чтобы, например, команда SaveOrder стала активной.
-                        OnPropertyChanged(nameof(SelectedOrder));
-                    }
-                }
-            }
+            //            // Обновляем состояние, чтобы, например, команда SaveOrder стала активной.
+            //            OnPropertyChanged(nameof(SelectedOrder));
+            //        }
+            //    }
+            //}
         }
 
         /// <summary>

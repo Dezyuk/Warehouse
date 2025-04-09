@@ -1,48 +1,53 @@
-﻿using System;
-using System.Windows;
+﻿using System.Windows;
 using Warehouse.Models;
+using Warehouse.Services;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Warehouse.Views
 {
     public partial class EditOrderWindow : Window
     {
-        public Order Order { get; private set; }
-
+        // Можно установить DataContext через конструктор, ожидая, что он будет типа Order
         public EditOrderWindow(Order order)
         {
             InitializeComponent();
-            Order = order;
+            DataContext = order;
+        }
 
-            // Заполняем поля при открытии
-            CustomerNameTextBox.Text = Order.CustomerName;
-            OrderDatePicker.SelectedDate = Order.OrderDate;
-
-            // Заполняем список товаров
-            foreach (var product in Order.Products)
+        // Обработчик для кнопки "Добавить позицию"
+        private void AddPosition_Click(object sender, RoutedEventArgs e)
+        {
+            // Создаем и открываем окно для выбора продукта
+            // Здесь предполагаем, что OrderViewModel или родительский контекст организует добавление позиции.
+            // Для простоты, открываем ProductSelectionWindow.
+            var productSelectionWindow = new ProductSelectionWindow(App.ServiceProvider.GetService<IProductService>()); // Вариант получения сервиса через DI статически или иным способом.
+            if (productSelectionWindow.ShowDialog() == true && productSelectionWindow.SelectedProduct != null)
             {
-                ProductsListBox.Items.Add($"{product.Name} - {product.Quantity} шт.");
+                var selectedProduct = productSelectionWindow.SelectedProduct;
+                // Открываем окно редактирования для OrderProduct
+                var editPositionWindow = new OrderProductEditWindow(selectedProduct);
+                if (editPositionWindow.ShowDialog() == true && editPositionWindow.Result != null)
+                {
+                    // Добавляем позицию в заказ (DataContext)
+                    if (DataContext is Order order)
+                    {
+                        // Проверяем, существует ли позиция
+                        var existing = order.OrderProducts.Find(op => op.ProductId == selectedProduct.Id);
+                        if (existing != null)
+                        {
+                            existing.Quantity += editPositionWindow.Result.Quantity;
+                        }
+                        else
+                        {
+                            order.OrderProducts.Add(editPositionWindow.Result);
+                        }
+                    }
+                }
             }
         }
 
-        private void Save_Click(object sender, RoutedEventArgs e)
+        private void Ok_Click(object sender, RoutedEventArgs e)
         {
-            // Проверка корректности данных
-            if (string.IsNullOrWhiteSpace(CustomerNameTextBox.Text))
-            {
-                MessageBox.Show("Имя клиента не может быть пустым.");
-                return;
-            }
-
-            if (OrderDatePicker.SelectedDate == null)
-            {
-                MessageBox.Show("Выберите дату заказа.");
-                return;
-            }
-
-            // Сохранение изменений
-            Order.CustomerName = CustomerNameTextBox.Text;
-            Order.OrderDate = OrderDatePicker.SelectedDate.Value;
-
             DialogResult = true;
             Close();
         }
