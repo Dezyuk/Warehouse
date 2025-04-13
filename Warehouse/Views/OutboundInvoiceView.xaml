@@ -11,7 +11,9 @@
         </Grid.RowDefinitions>
 
         <!-- Кнопка для добавления товара в накладную -->
-        <Button Content="Добавить товар" Command="{Binding AddProductCommand}" Grid.Row="0" Margin="5"/>
+        <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,0,0,10">
+            <Button Content="Добавить товар" Command="{Binding AddProductCommand}" Margin="5"/>
+        </StackPanel>
 
         <!-- DataGrid для отображения списка позиций в накладной -->
         <DataGrid Grid.Row="1" ItemsSource="{Binding Invoice.OrderProducts}" AutoGenerateColumns="False" Margin="5">

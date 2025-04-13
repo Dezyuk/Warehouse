@@ -32,7 +32,7 @@ namespace Warehouse.Views
                     if (DataContext is Order order)
                     {
                         // Проверяем, существует ли позиция
-                        var existing = order.OrderProducts.Find(op => op.ProductId == selectedProduct.Id);
+                        var existing = order.OrderProducts.FirstOrDefault(op => op.ProductId == selectedProduct.Id);
                         if (existing != null)
                         {
                             existing.Quantity += editPositionWindow.Result.Quantity;

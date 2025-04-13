@@ -22,7 +22,7 @@
         <DataGrid Grid.Row="1" ItemsSource="{Binding Invoice.OrderProducts}" AutoGenerateColumns="False" Margin="5">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Товар" Binding="{Binding Product.Name}" Width="*"/>
-                <DataGridTextColumn Header="Количество" Binding="{Binding Quantity}" Width="100"/>
+                <DataGridTextColumn Header="Количество" Binding="{Binding Quantity}" Width="Auto"/>
             </DataGrid.Columns>
         </DataGrid>
 

@@ -36,7 +36,7 @@ namespace Warehouse.ViewModels
             {
                 CustomerName = "Приход",
                 OrderDate = DateTime.UtcNow,
-                OrderProducts = new System.Collections.Generic.List<OrderProduct>()
+                OrderProducts = new ObservableCollection<OrderProduct>()
             };
 
             AddProductCommand = new RelayCommand(AddProduct);
@@ -109,7 +109,7 @@ namespace Warehouse.ViewModels
             {
                 CustomerName = "Приход",
                 OrderDate = DateTime.UtcNow,
-                OrderProducts = new System.Collections.Generic.List<OrderProduct>()
+                OrderProducts = new ObservableCollection<OrderProduct>()
             };
             OnPropertyChanged(nameof(Invoice));
         }

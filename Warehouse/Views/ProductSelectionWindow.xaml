@@ -7,13 +7,27 @@
         mc:Ignorable="d"
         Title="Выбор товара" Height="400" Width="600"
         WindowStartupLocation="CenterOwner">
-    <DockPanel Margin="10">
-        <TextBlock DockPanel.Dock="Top" Text="Дважды щелкните по товару для выбора" Margin="0,0,0,10"/>
-        <ListBox x:Name="ProductsList" DisplayMemberPath="Name"
-                 MouseDoubleClick="ProductsList_MouseDoubleClick" />
-        <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
+    <Grid Margin="10">
+        
+        <Grid.RowDefinitions>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="*"/>
+            <!-- Список товаров -->
+            <RowDefinition Height="Auto"/>
+            <!-- Панель кнопок -->
+        </Grid.RowDefinitions>
+        <TextBlock DockPanel.Dock="Top" Text="Дважды щелкните по товару для выбора" Grid.Row="0" Margin="0,0,0,10"/>
+        <!-- ListBox для отображения товаров -->
+        <ListBox x:Name="ProductsList" Grid.Row="1" 
+                 ItemsSource="{Binding Products}" 
+                 DisplayMemberPath="Name"
+                 MouseDoubleClick="ProductsList_MouseDoubleClick"/>
+
+        <!-- Панель кнопок внизу -->
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
             <Button Content="OK" Width="80" Margin="5" Click="Ok_Click" IsDefault="True"/>
             <Button Content="Отмена" Width="80" Margin="5" Click="Cancel_Click" IsCancel="True"/>
         </StackPanel>
-    </DockPanel>
+    </Grid>
+    
 </Window>

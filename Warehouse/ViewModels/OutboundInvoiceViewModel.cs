@@ -44,7 +44,7 @@ namespace Warehouse.ViewModels
             {
                 CustomerName = "Расход", // Можно разрешить ввод имени в EditOrderWindow
                 OrderDate = DateTime.UtcNow,
-                OrderProducts = new System.Collections.Generic.List<OrderProduct>()
+                OrderProducts = new ObservableCollection<OrderProduct>()
             };
 
             AddProductCommand = new RelayCommand(AddProduct);
@@ -113,7 +113,7 @@ namespace Warehouse.ViewModels
             {
                 CustomerName = "Расход",
                 OrderDate = DateTime.UtcNow,
-                OrderProducts = new System.Collections.Generic.List<OrderProduct>()
+                OrderProducts = new ObservableCollection<OrderProduct>()
             };
             OnPropertyChanged(nameof(Invoice));
         }
