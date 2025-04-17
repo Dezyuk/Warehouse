@@ -4,8 +4,8 @@ using System.Windows;
 using System.Windows.Input;
 using Warehouse.Models;
 using Warehouse.Services;
-using Warehouse.Helper;// Для RelayCommand
-using Warehouse.Views;           // Для окон ProductSelectionWindow и OrderProductEditWindow
+using Warehouse.Helper;
+using Warehouse.Views;           
 
 namespace Warehouse.ViewModels
 {
@@ -17,6 +17,7 @@ namespace Warehouse.ViewModels
     public class OrderViewModel : BaseViewModel
     {
         private readonly IOrderService _orderService;
+        private readonly IProductService _productService;
 
         /// <summary>
         /// Коллекция заказов для отображения.
@@ -43,9 +44,10 @@ namespace Warehouse.ViewModels
         public ICommand SaveOrderCommand { get; }
         public ICommand DeleteOrderCommand { get; }
 
-        public OrderViewModel(IOrderService orderService)
+        public OrderViewModel(IOrderService orderService, IProductService productService)
         {
             _orderService = orderService;
+            _productService = productService;
 
             CreateOrderCommand = new RelayCommand(CreateOrder);
             AddProductToOrderCommand = new RelayCommand(AddProductToOrder, () => SelectedOrder != null);
@@ -91,30 +93,30 @@ namespace Warehouse.ViewModels
         {
             if (SelectedOrder == null)
                 return;
+            // Составляем список Id товаров, которые уже добавлены в накладную
+            var excludedIds = SelectedOrder.OrderProducts.Select(op => op.ProductId).ToList();
 
-            // Открываем окно выбора продукта.
-            //var productSelectionWindow = new ProductSelectionWindow();
-            //if (productSelectionWindow.ShowDialog() == true)
-            //{
-            //    Product selectedProduct = productSelectionWindow.SelectedProduct;
-            //    if (selectedProduct != null)
-            //    {
-            //        // Открываем окно ввода данных для OrderProduct (например, количество, скидку).
-            //        var orderProductEditWindow = new OrderProductEditWindow(selectedProduct);
-            //        if (orderProductEditWindow.ShowDialog() == true)
-            //        {
-            //            // Получаем созданный объект OrderProduct.
-            //            OrderProduct op = orderProductEditWindow.OrderProduct;
-
-            //            // Если заказ уже содержит продукт с таким ProductId, можно обновить количество.
-            //            // В данном примере просто добавляем новый объект.
-            //            SelectedOrder.OrderProducts.Add(op);
-
-            //            // Обновляем состояние, чтобы, например, команда SaveOrder стала активной.
-            //            OnPropertyChanged(nameof(SelectedOrder));
-            //        }
-            //    }
-            //}
+            var productSelectionWindow = new ProductSelectionWindow(_productService, excludedIds);
+            if (productSelectionWindow.ShowDialog() == true && productSelectionWindow.SelectedProduct != null)
+            {
+                Product selectedProduct = productSelectionWindow.SelectedProduct;
+                var editWindow = new OrderProductEditWindow(selectedProduct);
+                if (editWindow.ShowDialog() == true && editWindow.Result != null)
+                {
+                    OrderProduct newOp = editWindow.Result;
+                    // Если позиция уже существует, обновляем количество, иначе добавляем новую
+                    var existingOp = SelectedOrder.OrderProducts.FirstOrDefault(op => op.ProductId == newOp.ProductId);
+                    if (existingOp != null)
+                    {
+                        existingOp.Quantity = newOp.Quantity;
+                    }
+                    else
+                    {
+                        SelectedOrder.OrderProducts.Add(newOp);
+                    }
+                    OnPropertyChanged(nameof(SelectedOrder.OrderProducts));
+                }
+            }
         }
 
         /// <summary>
