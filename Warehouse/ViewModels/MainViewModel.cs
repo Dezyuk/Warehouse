@@ -27,17 +27,21 @@ namespace Warehouse.ViewModels
         public ICommand ShowInboundCommand { get; }
         public ICommand ShowOutboundCommand { get; }
         public ICommand ShowTopologyCommand { get; }
+        public ICommand ShowHistoryCommand { get; }
 
         private readonly ProductViewModel _productViewModel;
         private readonly InboundInvoiceViewModel _inboundInvoiceViewModel;
         private readonly OutboundInvoiceViewModel _outboundInvoiceViewModel;
+        private readonly InvoiceHistoryViewModel _invoceHistoryViewModel;
         public MainViewModel(ProductViewModel productViewModel,
             InboundInvoiceViewModel inboundInvoiceViewModel,
-            OutboundInvoiceViewModel outboundInvoiceViewModel)
+            OutboundInvoiceViewModel outboundInvoiceViewModel,
+            InvoiceHistoryViewModel invoceHistoryViewModel)
         {
             _inboundInvoiceViewModel = inboundInvoiceViewModel;
             _productViewModel = productViewModel;
             _outboundInvoiceViewModel = outboundInvoiceViewModel;
+            _invoceHistoryViewModel = invoceHistoryViewModel;
             // По умолчанию отображается окно товаров с передачей зависимостей
             CurrentView = new ProductView(_productViewModel);
 
@@ -47,6 +51,8 @@ namespace Warehouse.ViewModels
             ShowInboundCommand = new RelayCommand(() => CurrentView = new InboundInvoiceView(_inboundInvoiceViewModel));
             ShowOutboundCommand = new RelayCommand(() => CurrentView = new OutboundInvoiceView(_outboundInvoiceViewModel));
             ShowTopologyCommand = new RelayCommand(() => CurrentView = new WarehouseTopologyView());
+            ShowHistoryCommand = new RelayCommand(() => CurrentView = new InvoiceHistoryView(_invoceHistoryViewModel));
+            
         }
     }
 }

@@ -10,6 +10,7 @@
             <Button Content="Приход" Width="120" Margin="5" Command="{Binding ShowInboundCommand}" />
             <Button Content="Расход" Width="120" Margin="5" Command="{Binding ShowOutboundCommand}" />
             <Button Content="Топология" Width="120" Margin="5" Command="{Binding ShowTopologyCommand}" />
+            <Button Content="История" Width="120" Margin="5" Command="{Binding ShowHistoryCommand}" />
         </StackPanel>
         <!-- Область отображения текущего модуля -->
         <ContentControl Content="{Binding CurrentView}" />

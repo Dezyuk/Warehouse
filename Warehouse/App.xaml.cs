@@ -43,11 +43,13 @@ namespace Warehouse
 
             // Регистрация ViewModel
             services.AddSingleton<ProductViewModel>();
-            services.AddSingleton<OrderViewModel>();
+            //services.AddSingleton<OrderViewModel>();
             services.AddSingleton<OutboundInvoiceViewModel>();
             
             services.AddSingleton<InboundInvoiceViewModel>();
             services.AddSingleton<MainViewModel>();
+            services.AddSingleton<InvoiceHistoryViewModel>();
+            
 
             // Регистрация окон / UserControl-ов
             services.AddSingleton<MainWindow>();
@@ -55,7 +57,8 @@ namespace Warehouse
             services.AddSingleton<OutboundInvoiceView>();
             services.AddSingleton<ProductView>();
             services.AddSingleton<WarehouseTopologyView>();
-            
+            services.AddSingleton<InvoiceHistoryView>();
+
 
 
 
