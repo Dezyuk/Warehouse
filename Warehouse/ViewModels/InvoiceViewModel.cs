@@ -10,22 +10,23 @@ using Warehouse.Views;
 
 namespace Warehouse.ViewModels
 {
-    
-    /// Базовый ViewModel для накладных: общий код выбора товара и общая команда сохранения.
-    /// Конкретная логика сохранения (приход/расход) реализуется в наследниках.
-    
+    /// <summary>
+    /// Базовый VM для обеих накладных. Здесь объявлены команды,
+    /// общий метод AddProduct, проверка CanSave и метод ResetInvoice.
+    /// </summary>
     public abstract class InvoiceViewModel : BaseViewModel
     {
         protected readonly IOrderService _orderService;
         protected readonly IProductService _productService;
 
-        /// <summary>
-        /// Текущая накладная.
-        /// </summary>
         public Order Invoice { get; protected set; }
 
+        public string SaveButtonText { get; }
+     
         public ICommand AddProductCommand { get; }
         public ICommand SaveInvoiceCommand { get; }
+        public ICommand EditProductCommand { get; }
+        public ICommand RemoveProductCommand { get; }
 
         protected InvoiceViewModel(
             IOrderService orderService,
@@ -42,48 +43,44 @@ namespace Warehouse.ViewModels
                 OrderProducts = new ObservableCollection<OrderProduct>()
             };
 
+            // Текст кнопки зависит от вида накладной
+            SaveButtonText = initialCustomerName switch
+            {
+                "Приход" => "Провести приход",
+                "Расход" => "Провести расход",
+                _ => "Сохранить"
+            };
+
             AddProductCommand = new RelayCommand(AddProduct);
             SaveInvoiceCommand = new RelayCommand(SaveInvoice, CanSaveInvoice);
         }
 
         private void AddProduct()
         {
-            // Окно выбора товара (исключаем уже добавленные позиции)
-            var excludedIds = Invoice.OrderProducts.Select(op => op.ProductId).ToList();
-            var selWin = new ProductSelectionWindow(_productService, excludedIds);
-            if (selWin.ShowDialog() != true || selWin.SelectedProduct == null) return;
+            var excluded = Invoice.OrderProducts.Select(op => op.ProductId).ToList();
+            var selWin = new ProductSelectionWindow(_productService, excluded);
+            if (selWin.ShowDialog() != true || selWin.SelectedProduct == null)
+                return;
 
             var editWin = new OrderProductEditWindow(selWin.SelectedProduct);
-            if (editWin.ShowDialog() != true || editWin.Result == null) return;
+            if (editWin.ShowDialog() != true || editWin.Result == null)
+                return;
 
             var newOp = editWin.Result;
-            var exists = Invoice.OrderProducts.FirstOrDefault(op => op.ProductId == newOp.ProductId);
-            if (exists != null)
-            {
-                // по умолчанию замена — если нужно суммировать, сделайте exists.Quantity += newOp.Quantity
-                exists.Quantity = newOp.Quantity;
-            }
+            var existing = Invoice.OrderProducts.FirstOrDefault(op => op.ProductId == newOp.ProductId);
+            if (existing != null)
+                existing.Quantity += newOp.Quantity;
             else
-            {
                 Invoice.OrderProducts.Add(newOp);
-            }
 
-            // обновляем UI и проверяем, можно ли теперь сохранить
             OnPropertyChanged(nameof(Invoice.OrderProducts));
             ((RelayCommand)SaveInvoiceCommand).RaiseCanExecuteChanged();
         }
 
-        private bool CanSaveInvoice()
-            => Invoice.OrderProducts.Any();
+        private bool CanSaveInvoice() => Invoice.OrderProducts.Any();
 
         /// <summary>
-        /// Здесь происходит главная работа: сохранение накладной + изменение остатков в репозитории.
-        /// Конкретная реализация (прибавить или отнять) в наследниках.
-        /// </summary>
-        protected abstract void SaveInvoice();
-
-        /// <summary>
-        /// Сбрасывает текущее состояние накладной (создаёт новую пустую).
+        /// Сбрасывает накладную на новую пустую с тем же именем.
         /// </summary>
         protected void ResetInvoice(string customerName)
         {
@@ -96,5 +93,12 @@ namespace Warehouse.ViewModels
             OnPropertyChanged(nameof(Invoice));
             ((RelayCommand)SaveInvoiceCommand).RaiseCanExecuteChanged();
         }
+
+        /// <summary>
+        /// Наследники реализуют логику сохранения (пополнение или списание остатков).
+        /// </summary>
+        protected abstract void SaveInvoice();
+
+        
     }
 }

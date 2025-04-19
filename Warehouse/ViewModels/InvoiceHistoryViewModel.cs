@@ -1,5 +1,4 @@
 ﻿using System.Collections.ObjectModel;
-using System.Windows;
 using System.Windows.Input;
 using Warehouse.Helper;
 using Warehouse.Models;
@@ -13,7 +12,6 @@ namespace Warehouse.ViewModels
         private readonly IOrderService _orderService;
 
         public ObservableCollection<Order> Orders { get; }
-            = new ObservableCollection<Order>();
 
         private Order? _selectedOrder;
         public Order? SelectedOrder
@@ -22,29 +20,21 @@ namespace Warehouse.ViewModels
             set { _selectedOrder = value; OnPropertyChanged(); }
         }
 
-        public ICommand RefreshCommand { get; }
         public ICommand EditCommand { get; }
 
         public InvoiceHistoryViewModel(IOrderService orderService)
         {
             _orderService = orderService;
-            RefreshCommand = new RelayCommand(LoadOrders);
-            EditCommand = new RelayCommand(EditOrder, () => SelectedOrder != null);
-            LoadOrders();
-        }
+            Orders = orderService.Orders;
 
-        private void LoadOrders()
-        {
-            Orders.Clear();
-            foreach (var o in _orderService.GetAllOrders())
-                Orders.Add(o);
+            EditCommand = new RelayCommand(EditOrder, () => SelectedOrder != null);
         }
 
         private void EditOrder()
         {
             if (SelectedOrder == null) return;
 
-            // Копируем для редактирования
+            // Создаём копию для редактирования
             var edited = new Order
             {
                 Id = SelectedOrder.Id,
@@ -57,7 +47,7 @@ namespace Warehouse.ViewModels
             if (win.ShowDialog() == true)
             {
                 _orderService.UpdateOrder(edited);
-                LoadOrders();
+                // Orders обновится автоматически
             }
         }
     }

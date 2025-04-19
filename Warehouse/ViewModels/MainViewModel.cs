@@ -48,8 +48,8 @@ namespace Warehouse.ViewModels
             // Инициализация команд. При выполнении команды устанавливаем нужный UserControl.
             ShowProductsCommand = new RelayCommand(() => CurrentView = new ProductView(_productViewModel));
             // Остальные команды можно добавить, если соответствующие UserControl созданы:
-            ShowInboundCommand = new RelayCommand(() => CurrentView = new InboundInvoiceView(_inboundInvoiceViewModel));
-            ShowOutboundCommand = new RelayCommand(() => CurrentView = new OutboundInvoiceView(_outboundInvoiceViewModel));
+            ShowInboundCommand = new RelayCommand(() => CurrentView = new InvoiceView(_inboundInvoiceViewModel));
+            ShowOutboundCommand = new RelayCommand(() => CurrentView = new InvoiceView(_outboundInvoiceViewModel));
             ShowTopologyCommand = new RelayCommand(() => CurrentView = new WarehouseTopologyView());
             ShowHistoryCommand = new RelayCommand(() => CurrentView = new InvoiceHistoryView(_invoceHistoryViewModel));
             

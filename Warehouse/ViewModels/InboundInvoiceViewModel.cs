@@ -1,12 +1,10 @@
-﻿using System;
-using System.Windows;
-using Warehouse.Models;
+﻿using System.Windows;
 using Warehouse.Services;
 
 namespace Warehouse.ViewModels
 {
     /// <summary>
-    /// Логика приходной накладной: пополнение остатков и сохранение заказа.
+    /// Приходная накладная — пополняет остатки.
     /// </summary>
     public class InboundInvoiceViewModel : InvoiceViewModel
     {
@@ -14,26 +12,27 @@ namespace Warehouse.ViewModels
             IOrderService orderService,
             IProductService productService)
             : base(orderService, productService, initialCustomerName: "Приход")
-        { }
+        {
+        }
 
         protected override void SaveInvoice()
         {
-            // Для каждой позиции увеличиваем остаток
+            // Увеличиваем остатки
             foreach (var op in Invoice.OrderProducts)
             {
-                var prod = _productService.GetProductById(op.ProductId);
-                if (prod != null)
+                var product = _productService.GetProductById(op.ProductId);
+                if (product != null)
                 {
-                    prod.Quantity += op.Quantity;
-                    _productService.UpdateProduct(prod);
+                    product.Quantity += op.Quantity;
+                    _productService.UpdateProduct(product);
                 }
             }
 
             _orderService.AddOrder(Invoice);
             MessageBox.Show("Приходная накладная успешно сохранена", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
 
-            // сбрасываем на новую накладную
-            ResetInvoice(customerName: "Приход");
+            // Сбрасываем на новую пустую накладную
+            ResetInvoice("Приход");
         }
     }
 }

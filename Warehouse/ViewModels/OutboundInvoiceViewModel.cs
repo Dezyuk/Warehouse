@@ -1,12 +1,11 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Windows;
 using Warehouse.Services;
 
 namespace Warehouse.ViewModels
 {
     /// <summary>
-    /// Логика расходной накладной: списание остатков и сохранение заказа.
+    /// Расходная накладная — списывает остатки.
     /// </summary>
     public class OutboundInvoiceViewModel : InvoiceViewModel
     {
@@ -14,15 +13,16 @@ namespace Warehouse.ViewModels
             IOrderService orderService,
             IProductService productService)
             : base(orderService, productService, initialCustomerName: "Расход")
-        { }
+        {
+        }
 
         protected override void SaveInvoice()
         {
-            // Сначала проверка наличия
+            // Сначала проверяем, хватит ли остатков
             foreach (var op in Invoice.OrderProducts)
             {
-                var prod = _productService.GetProductById(op.ProductId);
-                if (prod == null || prod.Quantity < op.Quantity)
+                var product = _productService.GetProductById(op.ProductId);
+                if (product == null || product.Quantity < op.Quantity)
                 {
                     MessageBox.Show(
                         $"Недостаточно товара для списания: {op.Product?.Name}",
@@ -36,16 +36,16 @@ namespace Warehouse.ViewModels
             // Списываем остатки
             foreach (var op in Invoice.OrderProducts)
             {
-                var prod = _productService.GetProductById(op.ProductId);
-                prod.Quantity -= op.Quantity;
-                _productService.UpdateProduct(prod);
+                var product = _productService.GetProductById(op.ProductId);
+                product.Quantity -= op.Quantity;
+                _productService.UpdateProduct(product);
             }
 
             _orderService.AddOrder(Invoice);
             MessageBox.Show("Расходная накладная успешно сохранена", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
 
-            // сбрасываем на новую накладную
-            ResetInvoice(customerName: "Расход");
+            // Сбрасываем на новую пустую накладную
+            ResetInvoice("Расход");
         }
     }
 }

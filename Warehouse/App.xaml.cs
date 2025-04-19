@@ -53,12 +53,16 @@ namespace Warehouse
 
             // Регистрация окон / UserControl-ов
             services.AddSingleton<MainWindow>();
-            services.AddSingleton<InboundInvoiceView>();
-            services.AddSingleton<OutboundInvoiceView>();
             services.AddSingleton<ProductView>();
             services.AddSingleton<WarehouseTopologyView>();
-            services.AddSingleton<InvoiceHistoryView>();
+            services.AddTransient<InvoiceHistoryView>();
+            // приходная накладная
+            services.AddTransient<InvoiceView>(sp =>
+                new InvoiceView(sp.GetRequiredService<InboundInvoiceViewModel>()));
 
+            // расходная накладная
+            services.AddTransient<InvoiceView>(sp =>
+                new InvoiceView(sp.GetRequiredService<OutboundInvoiceViewModel>()));
 
 
 

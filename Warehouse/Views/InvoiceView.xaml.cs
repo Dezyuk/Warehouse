@@ -3,9 +3,9 @@ using Warehouse.ViewModels;
 
 namespace Warehouse.Views
 {
-    public partial class OutboundInvoiceView : UserControl
+    public partial class InvoiceView : UserControl
     {
-        public OutboundInvoiceView(OutboundInvoiceViewModel viewModel)
+        public InvoiceView(InvoiceViewModel viewModel)
         {
             InitializeComponent();
             DataContext = viewModel;
