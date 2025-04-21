@@ -24,8 +24,6 @@ namespace Warehouse
 
         private void ConfigureServices(IServiceCollection services)
         {
-            //services.AddDbContext<WarehouseContext>(options =>
-            //    options.UseNpgsql("Host=localhost;Port=5432;Database=Warehouse_DB;Username=postgres;Password=123456"));
 
             services.AddDbContext<WarehouseContext>();
 
@@ -49,7 +47,8 @@ namespace Warehouse
             services.AddSingleton<InboundInvoiceViewModel>();
             services.AddSingleton<MainViewModel>();
             services.AddSingleton<InvoiceHistoryViewModel>();
-            
+            services.AddSingleton<TopologyViewModel>();
+
 
             // Регистрация окон / UserControl-ов
             services.AddSingleton<MainWindow>();
@@ -64,7 +63,7 @@ namespace Warehouse
             services.AddTransient<InvoiceView>(sp =>
                 new InvoiceView(sp.GetRequiredService<OutboundInvoiceViewModel>()));
 
-
+            
 
 
         }

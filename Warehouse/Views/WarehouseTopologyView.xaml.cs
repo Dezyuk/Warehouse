@@ -1,104 +1,126 @@
-﻿using System.Windows;
+﻿using System.Linq;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Shapes;
 using Warehouse.Models;
+using Warehouse.ViewModels;
 
 namespace Warehouse.Views
 {
     public partial class WarehouseTopologyView : UserControl
     {
-        // Здесь можно загрузить данные (например, через WarehouseTopologyViewModel)
-        // Для простоты создадим список ячеек в памяти
-        private readonly System.Collections.Generic.List<Cell> _cells = new System.Collections.Generic.List<Cell>();
-
-        public WarehouseTopologyView()
+        public WarehouseTopologyView(TopologyViewModel vm)
         {
             InitializeComponent();
-            // Пример: загрузка существующих ячеек (здесь можно вызвать сервис или ViewModel)
-            // Для демонстрации создадим одну ячейку
-            _cells.Add(new Cell { Id = 1, X = 1, Y = 1, WarehouseZoneType = ZoneType.Storage });
-            RenderCells();
+            DataContext = vm;
         }
 
-        private void RenderCells()
+        // Общая логика клика/рисования на Canvas
+        private void ProcessClick(Point pos)
         {
-            WarehouseCanvas.Children.Clear();
-            foreach (var cell in _cells)
+            var vm = (TopologyViewModel)DataContext;
+            int x = (int)(pos.X / 55);
+            int y = (int)(pos.Y / 55);
+
+            switch (vm.CurrentMode)
             {
-                var rect = new Rectangle
-                {
-                    Width = 50,
-                    Height = 50,
-                    Fill = Brushes.LightBlue,
-                    Stroke = Brushes.Black,
-                    StrokeThickness = 1,
-                    Tag = cell
-                };
-                Canvas.SetLeft(rect, cell.X * 55);
-                Canvas.SetTop(rect, cell.Y * 55);
-                WarehouseCanvas.Children.Add(rect);
-            }
-        }
-
-        private void AddCell_Click(object sender, RoutedEventArgs e)
-        {
-            // Пример: добавление новой ячейки рядом с последней (простое правило)
-            int newX = _cells.Last().X + 1;
-            int newY = _cells.Last().Y;
-            // Здесь можно открыть окно выбора типа ячейки
-            var newCell = new Cell { Id = _cells.Count + 1, X = newX, Y = newY, WarehouseZoneType = ZoneType.Storage };
-            _cells.Add(newCell);
-            RenderCells();
-        }
-
-        private void DeleteCell_Click(object sender, RoutedEventArgs e)
-        {
-            // Пример: удаляем последнюю ячейку
-            if (_cells.Any())
-            {
-                _cells.RemoveAt(_cells.Count - 1);
-                RenderCells();
-            }
-        }
-
-        private void WarehouseCanvas_MouseDown(object sender, MouseButtonEventArgs e)
-        {
-            // Здесь можно реализовать выбор ячейки для редактирования
-        }
-
-        // Пример обработки перетаскивания товара
-        private void WarehouseCanvas_Drop(object sender, DragEventArgs e)
-        {
-            // Проверяем, перетащен ли товар
-            if (e.Data.GetDataPresent(typeof(Product)))
-            {
-                var product = e.Data.GetData(typeof(Product)) as Product;
-                if (product != null)
-                {
-                    Point dropPosition = e.GetPosition(WarehouseCanvas);
-                    // Найти ячейку, в которую попадает перетаскивание
-                    foreach (var child in WarehouseCanvas.Children)
+                case TopologyMode.Add:
+                    // Разрешаем добавить, если:
+                    // 1) нет такой клетки, и
+                    // 2) это первая клетка (vm.Cells.Count==0) ИЛИ рядом есть существующая клетка
+                    if (!vm.Cells.Any(c => c.X == x && c.Y == y)
+                        && (vm.Cells.Count == 0 || vm.HasNeighbor(x, y)))
                     {
-                        if (child is Rectangle rect)
+                        vm.Cells.Add(new Cell
                         {
-                            double left = Canvas.GetLeft(rect);
-                            double top = Canvas.GetTop(rect);
-                            if (dropPosition.X >= left && dropPosition.X <= left + rect.Width &&
-                                dropPosition.Y >= top && dropPosition.Y <= top + rect.Height)
-                            {
-                                // Здесь можно установить, что эта ячейка теперь содержит товар
-                                if (rect.Tag is Cell cell)
-                                {
-                                    cell.Product = product;
-                                    // Дополнительно можно обновить состояние ячейки, например, изменить цвет
-                                    rect.Fill = Brushes.LightGreen;
-                                }
-                            }
-                        }
+                            X = x,
+                            Y = y,
+                            ZoneType = vm.SelectedZoneType
+                        });
                     }
-                }
+                    break;
+
+                case TopologyMode.Delete:
+                    var toDelete = vm.Cells.FirstOrDefault(c => c.X == x && c.Y == y);
+                    if (toDelete != null)
+                    {
+                        if (toDelete.Product != null)
+                            vm.UnassignedItems.Add(toDelete.Product);
+                        vm.Cells.Remove(toDelete);
+                    }
+                    break;
+
+                case TopologyMode.ChangeType:
+                    var toChange = vm.Cells.FirstOrDefault(c => c.X == x && c.Y == y);
+                    if (toChange != null)
+                        toChange.ZoneType = vm.SelectedZoneType;
+                    break;
+
+                    // Для режима View обрабатывается drop, здесь клики не нужны
+            }
+        }
+
+        // Обработчик нажатия мыши
+        private void OnCanvasMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            var pos = e.GetPosition(TopologyCanvas);
+            ProcessClick(pos);
+        }
+
+        // Обработчик движения мыши (для режима Add — рисование зажатием)
+        private void OnCanvasMouseMove(object sender, MouseEventArgs e)
+        {
+            var vm = (TopologyViewModel)DataContext;
+            if (vm.CurrentMode == TopologyMode.Add
+             && e.LeftButton == MouseButtonState.Pressed)
+            {
+                var pos = e.GetPosition(TopologyCanvas);
+                ProcessClick(pos);
+            }
+        }
+
+        // Обработка дропа товара на клетку
+        private void OnCanvasDrop(object sender, DragEventArgs e)
+        {
+            var vm = (TopologyViewModel)DataContext;
+            if (vm.CurrentMode != TopologyMode.View) return;
+            if (!e.Data.GetDataPresent(typeof(Product))) return;
+
+            var p = (Product)e.Data.GetData(typeof(Product));
+            var pos = e.GetPosition(TopologyCanvas);
+            int x = (int)(pos.X / 55);
+            int y = (int)(pos.Y / 55);
+
+            var cell = vm.Cells.FirstOrDefault(c => c.X == x && c.Y == y);
+            if (cell == null) return;
+
+            if (cell.ProductId == null)
+            {
+                cell.Product = p;
+                cell.ProductId = p.Id;
+                cell.Quantity = 1;
+                vm.AssignedItems.Add(p);
+                vm.UnassignedItems.Remove(p);
+            }
+            else if (cell.ProductId == p.Id && cell.Quantity < 1000)
+            {
+                cell.Quantity++;
+            }
+            else
+            {
+                MessageBox.Show(
+                  "Нельзя положить сюда этот товар.",
+                  "Ошибка",
+                  MessageBoxButton.OK,
+                  MessageBoxImage.Warning);
+            }
+        }
+        private void OnProductDragStart(object sender, MouseButtonEventArgs e)
+        {
+            var element = sender as FrameworkElement;
+            if (element?.DataContext is Product product)
+            {
+                DragDrop.DoDragDrop(element, product, DragDropEffects.Move);
             }
         }
     }

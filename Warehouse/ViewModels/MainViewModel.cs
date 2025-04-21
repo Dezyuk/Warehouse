@@ -33,15 +33,18 @@ namespace Warehouse.ViewModels
         private readonly InboundInvoiceViewModel _inboundInvoiceViewModel;
         private readonly OutboundInvoiceViewModel _outboundInvoiceViewModel;
         private readonly InvoiceHistoryViewModel _invoceHistoryViewModel;
+        private readonly WarehouseTopologyView _topologyView;
         public MainViewModel(ProductViewModel productViewModel,
             InboundInvoiceViewModel inboundInvoiceViewModel,
             OutboundInvoiceViewModel outboundInvoiceViewModel,
-            InvoiceHistoryViewModel invoceHistoryViewModel)
+            InvoiceHistoryViewModel invoceHistoryViewModel,
+            WarehouseTopologyView topologyView)
         {
             _inboundInvoiceViewModel = inboundInvoiceViewModel;
             _productViewModel = productViewModel;
             _outboundInvoiceViewModel = outboundInvoiceViewModel;
             _invoceHistoryViewModel = invoceHistoryViewModel;
+            _topologyView = topologyView;
             // По умолчанию отображается окно товаров с передачей зависимостей
             CurrentView = new ProductView(_productViewModel);
 
@@ -50,9 +53,10 @@ namespace Warehouse.ViewModels
             // Остальные команды можно добавить, если соответствующие UserControl созданы:
             ShowInboundCommand = new RelayCommand(() => CurrentView = new InvoiceView(_inboundInvoiceViewModel));
             ShowOutboundCommand = new RelayCommand(() => CurrentView = new InvoiceView(_outboundInvoiceViewModel));
-            ShowTopologyCommand = new RelayCommand(() => CurrentView = new WarehouseTopologyView());
             ShowHistoryCommand = new RelayCommand(() => CurrentView = new InvoiceHistoryView(_invoceHistoryViewModel));
-            
+
+            ShowTopologyCommand = new RelayCommand(() => CurrentView = _topologyView);
+
         }
     }
 }

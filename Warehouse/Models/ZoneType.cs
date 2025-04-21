@@ -1,7 +1,10 @@
-﻿public enum ZoneType
+﻿namespace Warehouse.Models
 {
-    Passage,        
-    ShippingArea,   
-    Storage,        
-    ReceivingArea   
+    public enum ZoneType
+    {
+        Passage,
+        Storage,
+        ShippingArea,
+        ReceivingArea
+    }
 }

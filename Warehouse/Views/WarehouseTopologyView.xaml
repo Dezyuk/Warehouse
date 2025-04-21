@@ -1,17 +1,78 @@
 ﻿<UserControl x:Class="Warehouse.Views.WarehouseTopologyView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             >
+             xmlns:models="clr-namespace:Warehouse.Models"
+             xmlns:conv="clr-namespace:Warehouse.Views.Converters">
+    <UserControl.Resources>
+        <conv:ZoneTypeToBrushConverter x:Key="ZoneBrush"/>
+        <conv:CoordToPosConverter   x:Key="CoordToPos"/>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+    </UserControl.Resources>
+
     <DockPanel Margin="10">
-        <!-- Панель управления топологией -->
+        <!-- Панель режимов -->
         <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,10">
-            <Button Content="Добавить ячейку" Click="AddCell_Click" Margin="5"/>
-            <Button Content="Удалить ячейку" Click="DeleteCell_Click" Margin="5"/>
+            <Button Content="Просмотр"        Command="{Binding SetModeCommand}" CommandParameter="{x:Static models:TopologyMode.View}"/>
+            <Button Content="Добавить клетку" Command="{Binding SetModeCommand}" CommandParameter="{x:Static models:TopologyMode.Add}" Margin="5,0"/>
+            <Button Content="Удалить клетку"  Command="{Binding SetModeCommand}" CommandParameter="{x:Static models:TopologyMode.Delete}" Margin="5,0"/>
+            <Button Content="Сменить тип"     Command="{Binding SetModeCommand}" CommandParameter="{x:Static models:TopologyMode.ChangeType}" Margin="5,0"/>
+            <Button Content="Сохранить"       Command="{Binding SaveTopologyCommand}"   Visibility="{Binding CurrentMode, Converter={StaticResource BoolToVis}}" Margin="20,0"/>
+            <Button Content="Отмена"          Command="{Binding CancelTopologyCommand}" Visibility="{Binding CurrentMode, Converter={StaticResource BoolToVis}}" Margin="5,0"/>
         </StackPanel>
-        <!-- Основное окно топологии (Canvas) -->
-        <Canvas x:Name="WarehouseCanvas" Background="LightGray" AllowDrop="True"
-                MouseDown="WarehouseCanvas_MouseDown" Drop="WarehouseCanvas_Drop"/>
-        <!-- Панель товаров без ячеек -->
-        <!-- (Можно реализовать как отдельный ListBox) -->
+
+        <!-- Выбор типа в режиме ChangeType -->
+        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,10"
+                Visibility="{Binding CurrentMode, Converter={StaticResource BoolToVis}}">
+            <Button Content="Проезд"   Command="{Binding SetZoneTypeCommand}" CommandParameter="{x:Static models:ZoneType.Passage}" Margin="3,0"/>
+            <Button Content="Склад"    Command="{Binding SetZoneTypeCommand}" CommandParameter="{x:Static models:ZoneType.Storage}" Margin="3,0"/>
+            <Button Content="Отгрузка" Command="{Binding SetZoneTypeCommand}" CommandParameter="{x:Static models:ZoneType.ShippingArea}" Margin="3,0"/>
+            <Button Content="Приём"    Command="{Binding SetZoneTypeCommand}" CommandParameter="{x:Static models:ZoneType.ReceivingArea}" Margin="3,0"/>
+        </StackPanel>
+
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition Width="200"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Canvas с клетками -->
+            <ScrollViewer>
+                <Canvas x:Name="TopologyCanvas" Background="LightGray"
+                MouseDown="OnCanvasMouseDown"
+                MouseMove="OnCanvasMouseMove"
+                AllowDrop="True"
+                Drop="OnCanvasDrop">
+                    <ItemsControl ItemsSource="{Binding Cells}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <Canvas/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemContainerStyle>
+                            <Style>
+                                <Setter Property="Canvas.Left" Value="{Binding X, Converter={StaticResource CoordToPos}}"/>
+                                <Setter Property="Canvas.Top"  Value="{Binding Y, Converter={StaticResource CoordToPos}}"/>
+                            </Style>
+                        </ItemsControl.ItemContainerStyle>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Rectangle Width="50" Height="50"
+                           Stroke="Black" StrokeThickness="1"
+                           Fill="{Binding ZoneType, Converter={StaticResource ZoneBrush}}"
+                           Tag="{Binding}"/>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </Canvas>
+            </ScrollViewer>
+
+            <!-- Списки товаров -->
+            <StackPanel Grid.Column="1" Margin="10,0,0,0">
+                <TextBlock Text="В ячейках:" FontWeight="Bold"/>
+                <ListBox ItemsSource="{Binding AssignedItems}" PreviewMouseLeftButtonDown="OnProductDragStart"/>
+                <TextBlock Text="Не расставлены:" FontWeight="Bold" Margin="0,10,0,0"/>
+                <ListBox ItemsSource="{Binding UnassignedItems}" PreviewMouseLeftButtonDown="OnProductDragStart"/>
+            </StackPanel>
+        </Grid>
     </DockPanel>
 </UserControl>

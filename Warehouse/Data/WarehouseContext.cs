@@ -46,7 +46,7 @@ namespace Warehouse.Data
 
             // Устанавливаем значение по умолчанию для типа зоны
             modelBuilder.Entity<Cell>()
-                .Property(c => c.WarehouseZoneType)
+                .Property(c => c.ZoneType)
                 .HasConversion<int>(); // Enum сохраняем как int
 
             base.OnModelCreating(modelBuilder);
