@@ -15,113 +15,96 @@ namespace Warehouse.Views
             DataContext = vm;
         }
 
-        // Общая логика клика/рисования на Canvas
         private void ProcessClick(Point pos)
         {
             var vm = (TopologyViewModel)DataContext;
-            int x = (int)(pos.X / 55);
-            int y = (int)(pos.Y / 55);
+            int x = (int)(pos.X / 55), y = (int)(pos.Y / 55);
 
             switch (vm.CurrentMode)
             {
                 case TopologyMode.Add:
-                    // Разрешаем добавить, если:
-                    // 1) нет такой клетки, и
-                    // 2) это первая клетка (vm.Cells.Count==0) ИЛИ рядом есть существующая клетка
                     if (!vm.Cells.Any(c => c.X == x && c.Y == y)
                         && (vm.Cells.Count == 0 || vm.HasNeighbor(x, y)))
-                    {
-                        vm.Cells.Add(new Cell
-                        {
-                            X = x,
-                            Y = y,
-                            ZoneType = vm.SelectedZoneType
-                        });
-                    }
+                        vm.Cells.Add(new Cell { X = x, Y = y, ZoneType = vm.SelectedZoneType });
                     break;
 
                 case TopologyMode.Delete:
-                    var toDelete = vm.Cells.FirstOrDefault(c => c.X == x && c.Y == y);
-                    if (toDelete != null)
+                    var d = vm.Cells.FirstOrDefault(c => c.X == x && c.Y == y);
+                    if (d != null)
                     {
-                        if (toDelete.Product != null)
-                            vm.UnassignedItems.Add(toDelete.Product);
-                        vm.Cells.Remove(toDelete);
+                        if (d.Product != null) vm.UnassignedItems.Add(d.Product);
+                        vm.Cells.Remove(d);
                     }
                     break;
 
                 case TopologyMode.ChangeType:
-                    var toChange = vm.Cells.FirstOrDefault(c => c.X == x && c.Y == y);
-                    if (toChange != null)
-                        toChange.ZoneType = vm.SelectedZoneType;
+                    var ch = vm.Cells.FirstOrDefault(c => c.X == x && c.Y == y);
+                    if (ch != null) ch.ZoneType = vm.SelectedZoneType;
                     break;
-
-                    // Для режима View обрабатывается drop, здесь клики не нужны
             }
         }
 
-        // Обработчик нажатия мыши
         private void OnCanvasMouseDown(object sender, MouseButtonEventArgs e)
-        {
-            var pos = e.GetPosition(TopologyCanvas);
-            ProcessClick(pos);
-        }
+            => ProcessClick(e.GetPosition(TopologyCanvas));
 
-        // Обработчик движения мыши (для режима Add — рисование зажатием)
         private void OnCanvasMouseMove(object sender, MouseEventArgs e)
         {
             var vm = (TopologyViewModel)DataContext;
-            if (vm.CurrentMode == TopologyMode.Add
-             && e.LeftButton == MouseButtonState.Pressed)
+            if (e.LeftButton == MouseButtonState.Pressed
+                && (vm.CurrentMode == TopologyMode.Add || vm.CurrentMode == TopologyMode.Delete))
             {
-                var pos = e.GetPosition(TopologyCanvas);
-                ProcessClick(pos);
+                ProcessClick(e.GetPosition(TopologyCanvas));
             }
         }
-
-        // Обработка дропа товара на клетку
-        private void OnCanvasDrop(object sender, DragEventArgs e)
+        private void OnCanvasDragOver(object sender, DragEventArgs e)
         {
-            var vm = (TopologyViewModel)DataContext;
-            if (vm.CurrentMode != TopologyMode.View) return;
-            if (!e.Data.GetDataPresent(typeof(Product))) return;
+            if (!e.Data.GetDataPresent("Product")) return; // Проверяем, что перетаскиваемый объект — это товар.
 
-            var p = (Product)e.Data.GetData(typeof(Product));
-            var pos = e.GetPosition(TopologyCanvas);
-            int x = (int)(pos.X / 55);
-            int y = (int)(pos.Y / 55);
-
-            var cell = vm.Cells.FirstOrDefault(c => c.X == x && c.Y == y);
-            if (cell == null) return;
-
-            if (cell.ProductId == null)
+            var targetCell = (sender as FrameworkElement)?.Tag as Cell;
+            if (targetCell != null && targetCell.ZoneType == ZoneType.Storage)
             {
-                cell.Product = p;
-                cell.ProductId = p.Id;
-                cell.Quantity = 1;
-                vm.AssignedItems.Add(p);
-                vm.UnassignedItems.Remove(p);
-            }
-            else if (cell.ProductId == p.Id && cell.Quantity < 1000)
-            {
-                cell.Quantity++;
+                e.Effects = DragDropEffects.Move;  // Разрешаем перемещение только в зоны хранения
             }
             else
             {
-                MessageBox.Show(
-                  "Нельзя положить сюда этот товар.",
-                  "Ошибка",
-                  MessageBoxButton.OK,
-                  MessageBoxImage.Warning);
+                e.Effects = DragDropEffects.None;  // Запрещаем перемещение в другие зоны
             }
         }
-        private void OnProductDragStart(object sender, MouseButtonEventArgs e)
+
+        private void OnCanvasDrop(object sender, DragEventArgs e)
         {
-            var element = sender as FrameworkElement;
-            if (element?.DataContext is Product product)
+            if (e.Data.GetDataPresent("Product"))
             {
-                DragDrop.DoDragDrop(element, product, DragDropEffects.Move);
+                var product = e.Data.GetData("Product") as Product;
+                var targetCell = (sender as FrameworkElement)?.Tag as Cell;
+
+                if (targetCell != null && product != null)
+                {
+                    // Перемещаем товар в ячейку
+                    var viewModel = (TopologyViewModel)DataContext;
+                    viewModel.MoveProductToCell(targetCell, product);  // Метод из ViewModel для обновления состояния
+                }
             }
         }
+
+
+        private void OnProductDragStart(object sender, MouseEventArgs e)
+        {
+            var listBoxItem = sender as FrameworkElement;
+            if (listBoxItem == null) return;
+
+            // Извлекаем DataContext из элемента
+            var product = listBoxItem.DataContext as Product;
+
+            if (product != null)
+            {
+                // Начать перетаскивание
+                DataObject data = new DataObject();
+                data.SetData("Product", product);  // Продукт передается как DataObject
+                DragDrop.DoDragDrop(listBoxItem, data, DragDropEffects.Move);
+            }
+        }
+
+
     }
 }

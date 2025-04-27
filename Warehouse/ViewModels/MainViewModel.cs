@@ -33,12 +33,12 @@ namespace Warehouse.ViewModels
         private readonly InboundInvoiceViewModel _inboundInvoiceViewModel;
         private readonly OutboundInvoiceViewModel _outboundInvoiceViewModel;
         private readonly InvoiceHistoryViewModel _invoceHistoryViewModel;
-        private readonly WarehouseTopologyView _topologyView;
+        private readonly TopologyViewModel _topologyView;
         public MainViewModel(ProductViewModel productViewModel,
             InboundInvoiceViewModel inboundInvoiceViewModel,
             OutboundInvoiceViewModel outboundInvoiceViewModel,
             InvoiceHistoryViewModel invoceHistoryViewModel,
-            WarehouseTopologyView topologyView)
+            TopologyViewModel topologyView)
         {
             _inboundInvoiceViewModel = inboundInvoiceViewModel;
             _productViewModel = productViewModel;
@@ -55,7 +55,7 @@ namespace Warehouse.ViewModels
             ShowOutboundCommand = new RelayCommand(() => CurrentView = new InvoiceView(_outboundInvoiceViewModel));
             ShowHistoryCommand = new RelayCommand(() => CurrentView = new InvoiceHistoryView(_invoceHistoryViewModel));
 
-            ShowTopologyCommand = new RelayCommand(() => CurrentView = _topologyView);
+            ShowTopologyCommand = new RelayCommand(() => CurrentView = new WarehouseTopologyView(_topologyView));
 
         }
     }
