@@ -71,37 +71,38 @@ namespace Warehouse.ViewModels
                     .Where(c => c.ProductId == product.Id)
                     .Sum(c => c.Quantity);  // Суммируем количество товара в ячейках
 
+
                 if (totalQuantityInCells > 0)
                 {
-                    var pro = new Product
+                    var productCopy = new Product
                     {
                         Id = product.Id,
                         Name = product.Name,
                         Article = product.Article,
-                        Quantity = totalQuantityInCells,
+                        Quantity = product.Quantity,
                         Price = product.Price,
                         OrderProducts = product.OrderProducts
                     };
+                    productCopy.Quantity = totalQuantityInCells;
                     // Если продукт есть в ячейках, добавляем его в AssignedItems с учётом количества
-                    //product.Quantity = totalQuantityInCells; // Уменьшаем общее количество продукта
-                    AssignedItems.Add(pro);  // Добавляем в список расставленных товаров
+                    AssignedItems.Add(productCopy);  // Добавляем в список расставленных товаров
                 }
 
                 // Если остаток продукта больше нуля, он еще не расставлен и остается в UnassignedItems
                 if (product.Quantity - totalQuantityInCells > 0)
                 {
-                    var pro = new Product
+                    var productCopy = new Product
                     {
                         Id = product.Id,
                         Name = product.Name,
                         Article = product.Article,
-                        Quantity = product.Quantity - totalQuantityInCells,
+                        Quantity = product.Quantity,
                         Price = product.Price,
                         OrderProducts = product.OrderProducts
                     };
-                    //var uns = product;
+                    productCopy.Quantity = productCopy.Quantity - totalQuantityInCells;
                     //product.Quantity -= totalQuantityInCells;
-                    UnassignedItems.Add(pro);  // Добавляем в список не расставленных товаров
+                    UnassignedItems.Add(productCopy);  // Добавляем в список не расставленных товаров
                 }
             }
         }
@@ -118,7 +119,9 @@ namespace Warehouse.ViewModels
         private void SaveTopology()
         {
             var current = Cells.ToList();
-
+            //var all = _prodSvc.GetAllProducts();
+            AssignedItems.Clear();
+            UnassignedItems.Clear();
             // новые
             foreach (var added in current.Where(c => c.Id == 0))
                 _cellSvc.AddCell(added);
@@ -138,38 +141,16 @@ namespace Warehouse.ViewModels
         private void CancelTopology()
         {
             Cells.Clear();
-            foreach (var c in _originalCells.Select(Clone))
+            foreach (var c in _cellSvc.GetAllCells().ToList())
                 Cells.Add(c);
 
             // Обновляем товары
+            
+            var all = _prodSvc.GetAllProducts();
             AssignedItems.Clear();
             UnassignedItems.Clear();
-            var all = _prodSvc.GetAllProducts();
             InitializeProducts();
-            //foreach (var product in all)
-            //{
-            //    if (Cells.Any(c => c.ProductId == product.Id))
-            //    {
-            //        // Если продукт уже расставлен, обновляем количество в AssignedItems
-            //        var assignedCell = Cells.First(c => c.ProductId == product.Id);
-            //        var quantityToPlace = Math.Min(product.Quantity, 1000 - assignedCell.Quantity);
 
-            //        assignedCell.Quantity += quantityToPlace; // Устанавливаем количество товара в ячейке
-            //        product.Quantity -= quantityToPlace; // Уменьшаем количество товара
-
-            //        // Обновляем списки Assigned и Unassigned
-            //        if (!AssignedItems.Contains(product))
-            //        {
-            //            AssignedItems.Add(product);
-            //        }
-            //        UnassignedItems.Remove(product); // Убираем из списка нерасставленных
-            //    }
-            //    else
-            //    {
-            //        // Если продукт ещё не расставлен, добавляем его в UnassignedItems
-            //        UnassignedItems.Add(product);
-            //    }
-            //}
 
             // Обновляем состояние интерфейса
             CurrentMode = TopologyMode.View;
@@ -197,38 +178,29 @@ namespace Warehouse.ViewModels
                 cell.Product = product;
                 cell.ProductId = product.Id;
                 cell.Quantity = product.Quantity < 1000 ? product.Quantity : 1000; // Устанавливаем количество товара в ячейке
-                if (AssignedItems.Contains(product))
-                {
-                    // Если товар уже есть в AssignedItems, увеличиваем его количество
-                    foreach (var item in AssignedItems.Where(e => e.Id == product.Id))
-                    {
-                        item.Quantity += 1000;
-                    }
+                var itemsToRemove = new List<Product>();
 
-                    // Уменьшаем количество товара в UnassignedItems
-                    foreach (var item in UnassignedItems.Where(e => e.Id == product.Id))
+                foreach (var item in UnassignedItems.Where(e => e.Id == product.Id).ToList())
+                {
+                    var productCopy = new Product
                     {
-                        item.Quantity -= 1000;
+                        Id = product.Id,
+                        Name = product.Name,
+                        Article = product.Article,
+                        Quantity = cell.Quantity,
+                        Price = product.Price,
+                        OrderProducts = product.OrderProducts
+                    };
+
+                    AssignedItems.Add(productCopy);
+                    UnassignedItems.Remove(item);
+                    item.Quantity -= cell.Quantity;
+                    if (item.Quantity != 0)
+                    {
+                        UnassignedItems.Add(item);
                     }
                 }
-                else
-                {
-                    InitializeProducts();
-                    // Если товара нет в AssignedItems, добавляем его
-                    //AssignedItems.Add(product); // Перемещаем товар в список "Расставленные"
 
-                    //// Уменьшаем количество товара в UnassignedItems
-                    //foreach (var item in UnassignedItems.Where(e => e.Id == product.Id))
-                    //{
-                    //    item.Quantity -= cell.Quantity;
-                    //    if(item.Quantity == 0)
-                    //    {
-                    //        UnassignedItems.Remove(item);
-                    //    }
-                    //}
-                }
-                //AssignedItems.Add(product); // Перемещаем товар в список "Расставленные"
-                //UnassignedItems.Remove(product); // Убираем товар из списка "Не расставленные"
             }
             // Если товар уже в ячейке, увеличиваем количество
             else if (cell.ProductId == product.Id && cell.Quantity < 1000)
