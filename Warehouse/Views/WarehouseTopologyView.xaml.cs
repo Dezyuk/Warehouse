@@ -14,7 +14,12 @@ namespace Warehouse.Views
             InitializeComponent();
             DataContext = vm;
         }
-
+        private void OnLoaded(object sender, RoutedEventArgs e)
+        {
+            // Обновляем ячейки
+            var vm = (TopologyViewModel)DataContext;
+            vm.InitializeProducts();
+        }
         private void ProcessClick(Point pos)
         {
             var vm = (TopologyViewModel)DataContext;
@@ -25,14 +30,18 @@ namespace Warehouse.Views
                 case TopologyMode.Add:
                     if (!vm.Cells.Any(c => c.X == x && c.Y == y)
                         && (vm.Cells.Count == 0 || vm.HasNeighbor(x, y)))
+                    {
                         vm.Cells.Add(new Cell { X = x, Y = y, ZoneType = vm.SelectedZoneType });
+                        vm.InitializeProducts();
+                    }
+                        //vm.Cells.Add(new Cell { X = x, Y = y, ZoneType = vm.SelectedZoneType });
                     break;
 
                 case TopologyMode.Delete:
                     var d = vm.Cells.FirstOrDefault(c => c.X == x && c.Y == y);
                     if (d != null)
                     {
-                        if (d.Product != null) vm.UnassignedItems.Add(d.Product);
+                        if (d.Product != null) vm.InitializeProducts(); ;
                         vm.Cells.Remove(d);
                     }
                     break;

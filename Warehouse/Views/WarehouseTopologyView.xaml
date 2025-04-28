@@ -2,7 +2,8 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:models="clr-namespace:Warehouse.Models"
-             xmlns:conv="clr-namespace:Warehouse.Views.Converters">
+             xmlns:conv="clr-namespace:Warehouse.Views.Converters"
+             Loaded="OnLoaded" >
     <UserControl.Resources>
         <conv:ZoneTypeToBrushConverter         x:Key="ZoneBrush"/>
         <conv:CoordToPosConverter             x:Key="CoordToPos"/>

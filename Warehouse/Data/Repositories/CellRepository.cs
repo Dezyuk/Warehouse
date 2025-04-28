@@ -38,7 +38,19 @@ namespace Warehouse.Data.Repositories
 
         public void UpdateCell(Cell cell)
         {
-            _context.Cells.Update(cell);
+            // ищем в контексте ту же самую сущность
+            var existing = _context.Cells.FirstOrDefault(c => c.Id == cell.Id);
+            if (existing == null)
+                throw new InvalidOperationException($"Cell {cell.Id} not found");
+
+            // переносим все изменившиеся поля
+            existing.X = cell.X;
+            existing.Y = cell.Y;
+            existing.ZoneType = cell.ZoneType;
+            existing.ProductId = cell.ProductId;
+            existing.Quantity = cell.Quantity;
+
+            // сохраняем изменения
             _context.SaveChanges();
         }
 

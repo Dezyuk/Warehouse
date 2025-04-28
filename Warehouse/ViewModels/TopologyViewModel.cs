@@ -60,8 +60,10 @@ namespace Warehouse.ViewModels
             InitializeProducts();
         }
 
-        private void InitializeProducts()
+        public void InitializeProducts()
         {
+            AssignedItems.Clear();
+            UnassignedItems.Clear();
             var all = _prodSvc.GetAllProducts();  // Получаем все товары
             var cells = _cellSvc.GetAllCells();   // Получаем все ячейки
 
@@ -104,6 +106,10 @@ namespace Warehouse.ViewModels
                     //product.Quantity -= totalQuantityInCells;
                     UnassignedItems.Add(productCopy);  // Добавляем в список не расставленных товаров
                 }
+                if(product.Quantity - totalQuantityInCells < 0)
+                {
+                    _cellSvc.UpdateCell(cells.Where(c => c.ProductId == product.Id).First());
+                }
             }
         }
         private Cell Clone(Cell c) => new Cell
@@ -119,9 +125,6 @@ namespace Warehouse.ViewModels
         private void SaveTopology()
         {
             var current = Cells.ToList();
-            //var all = _prodSvc.GetAllProducts();
-            AssignedItems.Clear();
-            UnassignedItems.Clear();
             // новые
             foreach (var added in current.Where(c => c.Id == 0))
                 _cellSvc.AddCell(added);
@@ -133,9 +136,9 @@ namespace Warehouse.ViewModels
                 _cellSvc.DeleteCell(del.Id);
 
             _originalCells = current.Select(Clone).ToList();
-            InitializeProducts();
             MessageBox.Show("Сохранено", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
             CurrentMode = TopologyMode.View;
+            InitializeProducts();
         }
 
         private void CancelTopology()
@@ -144,14 +147,8 @@ namespace Warehouse.ViewModels
             foreach (var c in _cellSvc.GetAllCells().ToList())
                 Cells.Add(c);
 
-            // Обновляем товары
             
-            var all = _prodSvc.GetAllProducts();
-            AssignedItems.Clear();
-            UnassignedItems.Clear();
             InitializeProducts();
-
-
             // Обновляем состояние интерфейса
             CurrentMode = TopologyMode.View;
         }
@@ -178,28 +175,8 @@ namespace Warehouse.ViewModels
                 cell.Product = product;
                 cell.ProductId = product.Id;
                 cell.Quantity = product.Quantity < 1000 ? product.Quantity : 1000; // Устанавливаем количество товара в ячейке
-                var itemsToRemove = new List<Product>();
-
-                foreach (var item in UnassignedItems.Where(e => e.Id == product.Id).ToList())
-                {
-                    var productCopy = new Product
-                    {
-                        Id = product.Id,
-                        Name = product.Name,
-                        Article = product.Article,
-                        Quantity = cell.Quantity,
-                        Price = product.Price,
-                        OrderProducts = product.OrderProducts
-                    };
-
-                    AssignedItems.Add(productCopy);
-                    UnassignedItems.Remove(item);
-                    item.Quantity -= cell.Quantity;
-                    if (item.Quantity != 0)
-                    {
-                        UnassignedItems.Add(item);
-                    }
-                }
+                _cellSvc.UpdateCell(cell);
+                InitializeProducts();
 
             }
             // Если товар уже в ячейке, увеличиваем количество
