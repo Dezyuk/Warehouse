@@ -15,5 +15,7 @@ namespace Warehouse.Services
         void AddCell(Cell cell);
         void UpdateCell(Cell cell);
         void DeleteCell(int id);
+        IEnumerable<Cell> GetCellsByProduct(int productId);
+        void DeductFromCells(int productId, int quantity);
     }
 }

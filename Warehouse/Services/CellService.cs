@@ -44,5 +44,39 @@ namespace Warehouse.Services
         {
             _cellRepository.DeleteCell(id);
         }
+
+        public IEnumerable<Cell> GetCellsByProduct(int productId)
+        {
+            return _cellRepository.GetAllCells()
+                .Where(c => c.ProductId == productId)
+                .OrderBy(c => c.Quantity)
+                .ToList();
+        }
+
+        // Списание из ячеек по логике: сначала из тех, где меньше всего
+        public void DeductFromCells(int productId, int quantity)
+        {
+            var toDeduct = quantity;
+            var cells = GetCellsByProduct(productId).ToList();
+
+            foreach (var cell in cells)
+            {
+                if (toDeduct <= 0)
+                    break;
+
+                var take = System.Math.Min(cell.Quantity, toDeduct);
+                cell.Quantity -= take;
+                toDeduct -= take;
+                if (cell.Quantity == 0)
+                {
+                    cell.Product = null;
+                    cell.ProductId = null;
+                }
+                _cellRepository.UpdateCell(cell);
+            }
+
+            if (toDeduct > 0)
+                throw new InvalidOperationException($"Не удалось списать {quantity} шт.: осталось {toDeduct} шт. в ячейках.");
+        }
     }
 }

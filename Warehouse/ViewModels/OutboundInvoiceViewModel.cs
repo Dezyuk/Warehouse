@@ -9,16 +9,19 @@ namespace Warehouse.ViewModels
     /// </summary>
     public class OutboundInvoiceViewModel : InvoiceViewModel
     {
+        private readonly ICellService _cellService;
         public OutboundInvoiceViewModel(
             IOrderService orderService,
-            IProductService productService)
+            IProductService productService,
+            ICellService cellService)
             : base(orderService, productService, initialCustomerName: "Расход")
         {
+            _cellService = cellService;
         }
 
         protected override void SaveInvoice()
         {
-            // Сначала проверяем, хватит ли остатков
+            // Проверка остатков
             foreach (var op in Invoice.OrderProducts)
             {
                 var product = _productService.GetProductById(op.ProductId);
@@ -33,10 +36,16 @@ namespace Warehouse.ViewModels
                 }
             }
 
-            // Списываем остатки
+            // Списание из ячеек
             foreach (var op in Invoice.OrderProducts)
             {
-                var product = _productService.GetProductById(op.ProductId);
+                _cellService.DeductFromCells(op.ProductId, op.Quantity);
+            }
+
+            // Обновление общего остатка товара
+            foreach (var op in Invoice.OrderProducts)
+            {
+                var product = _productService.GetProductById(op.ProductId)!;
                 product.Quantity -= op.Quantity;
                 _productService.UpdateProduct(product);
             }
@@ -44,7 +53,6 @@ namespace Warehouse.ViewModels
             _orderService.AddOrder(Invoice);
             MessageBox.Show("Расходная накладная успешно сохранена", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
 
-            // Сбрасываем на новую пустую накладную
             ResetInvoice("Расход");
         }
     }
