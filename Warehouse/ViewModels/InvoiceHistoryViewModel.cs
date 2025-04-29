@@ -10,6 +10,7 @@ namespace Warehouse.ViewModels
     public class InvoiceHistoryViewModel : BaseViewModel
     {
         private readonly IOrderService _orderService;
+        private readonly IProductService _productService;
 
         public ObservableCollection<Order> Orders { get; }
 
@@ -21,10 +22,12 @@ namespace Warehouse.ViewModels
         }
 
         public ICommand EditCommand { get; }
-
-        public InvoiceHistoryViewModel(IOrderService orderService)
+        
+        public InvoiceHistoryViewModel(IOrderService orderService, IProductService productService)
         {
+            
             _orderService = orderService;
+            _productService = productService;
             Orders = orderService.Orders;
 
             EditCommand = new RelayCommand(EditOrder, () => SelectedOrder != null);
@@ -34,21 +37,10 @@ namespace Warehouse.ViewModels
         {
             if (SelectedOrder == null) return;
 
-            // Создаём копию для редактирования
-            var edited = new Order
-            {
-                Id = SelectedOrder.Id,
-                CustomerName = SelectedOrder.CustomerName,
-                OrderDate = SelectedOrder.OrderDate,
-                OrderProducts = SelectedOrder.OrderProducts
-            };
 
-            var win = new EditOrderWindow(edited);
-            if (win.ShowDialog() == true)
-            {
-                _orderService.UpdateOrder(edited);
-                // Orders обновится автоматически
-            }
+            var win = new OrderDetailsWindow(SelectedOrder);
+            win.ShowDialog();
+
         }
     }
 }
