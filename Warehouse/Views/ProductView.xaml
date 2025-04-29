@@ -16,7 +16,7 @@
             <Button Content="Удалить" Command="{Binding DeleteCommand}" Margin="5"/>
         </StackPanel>
         <!-- Таблица для отображения списка товаров -->
-        <DataGrid Grid.Row="1" ItemsSource="{Binding Products}" SelectedItem="{Binding SelectedProduct, Mode=TwoWay}" AutoGenerateColumns="False">
+        <DataGrid Grid.Row="1" ItemsSource="{Binding Products}" SelectedItem="{Binding SelectedProduct, Mode=TwoWay}" AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="50"/>
                 <DataGridTextColumn Header="Название" Binding="{Binding Name}" Width="*"/>

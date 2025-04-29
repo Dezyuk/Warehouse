@@ -29,6 +29,8 @@ namespace Warehouse.ViewModels
             {
                 _selectedProduct = value;
                 OnPropertyChanged(); // Уведомляем UI об изменении
+                (UpdateCommand as RelayCommand)?.RaiseCanExecuteChanged();
+                (DeleteCommand as RelayCommand)?.RaiseCanExecuteChanged();
             }
         }
 
@@ -123,8 +125,17 @@ namespace Warehouse.ViewModels
             if (SelectedProduct == null)
                 return;
 
-            _productService.DeleteProduct(SelectedProduct.Id);
-            LoadProducts();
+            var result = System.Windows.MessageBox.Show(
+                $"Удалить продукт \"{SelectedProduct.Name}\"?",
+                "Подтверждение удаления",
+                System.Windows.MessageBoxButton.YesNo,
+                System.Windows.MessageBoxImage.Warning);
+
+            if (result == System.Windows.MessageBoxResult.Yes)
+            {
+                _productService.DeleteProduct(SelectedProduct.Id);
+                LoadProducts();
+            }
         }
     }
 }

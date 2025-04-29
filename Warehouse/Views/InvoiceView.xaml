@@ -30,7 +30,8 @@
                   ItemsSource="{Binding Invoice.OrderProducts}"
                   AutoGenerateColumns="False"
                   CanUserAddRows="False"
-                  Margin="0,0,0,10">
+                  Margin="0,0,0,10"
+                  IsReadOnly="True">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Товар"
                                     Binding="{Binding Product.Name}" Width="*"/>
