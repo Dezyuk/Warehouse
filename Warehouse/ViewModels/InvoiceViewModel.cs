@@ -22,7 +22,19 @@ namespace Warehouse.ViewModels
         public Order Invoice { get; protected set; }
 
         public string SaveButtonText { get; }
-     
+        private OrderProduct? _selectedOrderProduct;
+        public OrderProduct? SelectedOrderProduct
+        {
+            get => _selectedOrderProduct;
+            set
+            {
+                _selectedOrderProduct = value;
+                OnPropertyChanged();
+                ((RelayCommand)EditProductCommand).RaiseCanExecuteChanged();
+                ((RelayCommand)RemoveProductCommand).RaiseCanExecuteChanged();
+            }
+        }
+
         public ICommand AddProductCommand { get; }
         public ICommand SaveInvoiceCommand { get; }
         public ICommand EditProductCommand { get; }
@@ -53,8 +65,10 @@ namespace Warehouse.ViewModels
 
             AddProductCommand = new RelayCommand(AddProduct);
             SaveInvoiceCommand = new RelayCommand(SaveInvoice, CanSaveInvoice);
+            EditProductCommand = new RelayCommand(EditProduct, () => SelectedOrderProduct != null);
+            RemoveProductCommand = new RelayCommand(RemoveProduct, () => SelectedOrderProduct != null);
         }
-
+        
         private void AddProduct()
         {
             var excluded = Invoice.OrderProducts.Select(op => op.ProductId).ToList();
@@ -99,6 +113,30 @@ namespace Warehouse.ViewModels
         /// </summary>
         protected abstract void SaveInvoice();
 
-        
+        private void EditProduct()
+        {
+            if (SelectedOrderProduct == null) return;
+
+            var product = _productService.GetProductById(SelectedOrderProduct.ProductId);
+            if (product == null) return;
+
+            var editWindow = new OrderProductEditWindow(product, SelectedOrderProduct);
+            if (editWindow.ShowDialog() != true || editWindow.Result == null) return;
+
+            // Обновляем значения
+            SelectedOrderProduct.Quantity = editWindow.Result.Quantity;
+            SelectedOrderProduct.PriceAtOrder = editWindow.Result.PriceAtOrder;
+            OnPropertyChanged(nameof(Invoice.OrderProducts));
+        }
+
+        private void RemoveProduct()
+        {
+            if (SelectedOrderProduct == null) return;
+
+            Invoice.OrderProducts.Remove(SelectedOrderProduct);
+            SelectedOrderProduct = null;
+            OnPropertyChanged(nameof(Invoice.OrderProducts));
+            ((RelayCommand)SaveInvoiceCommand).RaiseCanExecuteChanged();
+        }
     }
 }

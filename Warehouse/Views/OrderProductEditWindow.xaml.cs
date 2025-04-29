@@ -13,6 +13,25 @@ namespace Warehouse.Views
             InitializeComponent();
             _selectedProduct = product;
             ProductNameText.Text = product.Name;
+            PriceText.Text = product.Price.ToString();
+            QuantityTextBox.Text = "1";
+        }
+
+        public OrderProductEditWindow(Product product, OrderProduct orderProduct)
+        {
+            InitializeComponent();
+            _selectedProduct = product;
+            ProductNameText.Text = product.Name;
+            QuantityTextBox.Text = orderProduct.Quantity.ToString();
+
+            // Создаём копию результата для возврата
+            Result = new OrderProduct
+            {
+                ProductId = orderProduct.ProductId,
+                Product = product,
+                Quantity = orderProduct.Quantity,
+                PriceAtOrder = orderProduct.PriceAtOrder
+            };
         }
 
         private void Confirm_Click(object sender, RoutedEventArgs e)
@@ -37,6 +56,7 @@ namespace Warehouse.Views
 
         private void Cancel_Click(object sender, RoutedEventArgs e)
         {
+            Result = null;
             DialogResult = false;
             Close();
         }

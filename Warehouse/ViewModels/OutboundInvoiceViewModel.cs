@@ -50,11 +50,15 @@ namespace Warehouse.ViewModels
                     
                 }
             }
-            MessageBox.Show(
+            if (!message.Equals(""))
+            {
+                MessageBox.Show(
                         message,
                         "Ошибка",
                         MessageBoxButton.OK,
                         MessageBoxImage.Warning);
+            }
+            
 
             // Обновление общего остатка товара
             foreach (var op in Invoice.OrderProducts)

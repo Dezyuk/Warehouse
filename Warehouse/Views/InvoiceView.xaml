@@ -31,7 +31,8 @@
                   AutoGenerateColumns="False"
                   CanUserAddRows="False"
                   Margin="0,0,0,10"
-                  IsReadOnly="True">
+                  IsReadOnly="True"
+                  SelectedItem="{Binding SelectedOrderProduct, Mode=TwoWay}">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Товар"
                                     Binding="{Binding Product.Name}" Width="*"/>
