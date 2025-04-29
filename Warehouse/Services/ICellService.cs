@@ -17,5 +17,6 @@ namespace Warehouse.Services
         void DeleteCell(int id);
         IEnumerable<Cell> GetCellsByProduct(int productId);
         void DeductFromCells(int productId, int quantity);
+        void AssignColorsToProductCells(IEnumerable<Cell> cells);
     }
 }

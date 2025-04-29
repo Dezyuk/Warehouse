@@ -71,6 +71,7 @@ namespace Warehouse.Services
                 {
                     cell.Product = null;
                     cell.ProductId = null;
+                    cell.FillColor = null;
                 }
                 _cellRepository.UpdateCell(cell);
             }
@@ -78,5 +79,40 @@ namespace Warehouse.Services
             if (toDeduct > 0)
                 throw new InvalidOperationException($"Не удалось списать {quantity} шт.: осталось {toDeduct} шт. в ячейках.");
         }
+
+
+        private Dictionary<int, string> _productColors = new();
+
+        private Random _random = new Random();
+
+        private string GetRandomColor()
+        {
+            return $"#{_random.Next(0x1000000):X6}"; // случайный цвет
+        }
+
+        public void AssignColorsToProductCells(IEnumerable<Cell> cells)
+        {
+
+            foreach (var cell in cells)
+            {
+                if (cell.ProductId == null)
+                {
+                    cell.FillColor = null; // нет товара — нет цвета
+                    continue;
+                }
+                if(cell.FillColor != null)
+                {
+                    _productColors[cell.ProductId.Value] = cell.FillColor;
+                }
+
+                if (!_productColors.ContainsKey(cell.ProductId.Value))
+                {
+                    _productColors[cell.ProductId.Value] = GetRandomColor();
+                }
+
+                cell.FillColor = _productColors[cell.ProductId.Value];
+            }
+        }
+
     }
 }

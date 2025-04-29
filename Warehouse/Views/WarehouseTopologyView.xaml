@@ -8,6 +8,8 @@
         <conv:ZoneTypeToBrushConverter         x:Key="ZoneBrush"/>
         <conv:CoordToPosConverter             x:Key="CoordToPos"/>
         <conv:TopologyModeToVisibilityConverter x:Key="ModeToVis"/>
+        <conv:ColorToBrushConverter x:Key="ColorToBrushConverter"/>
+        <conv:ProductToBrushConverter x:Key="ProductToBrushConverter"/>
     </UserControl.Resources>
 
     <DockPanel Margin="10">
@@ -56,12 +58,18 @@
                         </ItemsControl.ItemContainerStyle>
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
-                                <Rectangle Width="50" Height="50"
-                                    Stroke="Black" StrokeThickness="1"
-                                    Fill="{Binding ZoneType, Converter={StaticResource ZoneBrush}}"
-                                    Tag="{Binding}" AllowDrop="True"
-                                    DragOver="OnCanvasDragOver"
-                                    Drop="OnCanvasDrop"/>
+                                <Grid Width="50" Height="50"
+                                      DragOver="OnCanvasDragOver"
+                                      Drop="OnCanvasDrop"
+                                      Tag="{Binding}" AllowDrop="True">
+                                    <Rectangle 
+                                        Stroke="Black" StrokeThickness="1"
+                                        Fill="{Binding ZoneType, Converter={StaticResource ZoneBrush}}" />
+                                    <Rectangle Margin="5"
+                                        Fill="{Binding FillColor, Converter={StaticResource ColorToBrushConverter}}"
+                                        IsHitTestVisible="False"/>
+                                </Grid>
+
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
@@ -73,7 +81,20 @@
                 <ListBox ItemsSource="{Binding AssignedItems}">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
-                            <StackPanel Orientation="Horizontal" MouseDown="OnProductDragStart">
+                            <StackPanel Orientation="Horizontal" >
+
+                                <Rectangle Width="12" Height="12" Margin="0,0,5,0" Stroke="Black" StrokeThickness="0.5">
+                                    <Rectangle.Fill>
+                                        <MultiBinding Converter="{StaticResource ProductToBrushConverter}">
+                                            <!-- привязываем Produkt.Id -->
+                                            <Binding Path="Id"/>
+                                            <!-- привязываем всю коллекцию Cells из VM -->
+                                            <Binding Path="DataContext.Cells"
+                                                RelativeSource="{RelativeSource AncestorType=UserControl}"/>
+                                        </MultiBinding>
+                                    </Rectangle.Fill>
+                                </Rectangle>
+                                
                                 <TextBlock Text="{Binding Name}" />
                                 <TextBlock Text=" — " />
                                 <TextBlock Text="{Binding Quantity}" />
@@ -85,7 +106,6 @@
                 <ListBox ItemsSource="{Binding UnassignedItems}">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
-
                             <StackPanel Orientation="Horizontal" MouseDown="OnProductDragStart">
                                 <TextBlock Text="{Binding Name}" />
                                 <TextBlock Text=" — " />

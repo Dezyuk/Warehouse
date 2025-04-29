@@ -111,6 +111,7 @@ namespace Warehouse.ViewModels
                     _cellSvc.UpdateCell(cells.Where(c => c.ProductId == product.Id).First());
                 }
             }
+            _cellSvc.AssignColorsToProductCells(Cells);
         }
         private Cell Clone(Cell c) => new Cell
         {
@@ -175,6 +176,9 @@ namespace Warehouse.ViewModels
                 cell.Product = product;
                 cell.ProductId = product.Id;
                 cell.Quantity = product.Quantity < 1000 ? product.Quantity : 1000; // Устанавливаем количество товара в ячейке
+                
+                Cells.Remove(cell);
+                Cells.Add(cell);
                 _cellSvc.UpdateCell(cell);
                 InitializeProducts();
 
