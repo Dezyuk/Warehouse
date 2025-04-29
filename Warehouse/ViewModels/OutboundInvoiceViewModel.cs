@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using System.Windows;
+using Warehouse.Models;
 using Warehouse.Services;
 
 namespace Warehouse.ViewModels
@@ -35,12 +36,25 @@ namespace Warehouse.ViewModels
                     return;
                 }
             }
-
+            string message ="";
             // Списание из ячеек
             foreach (var op in Invoice.OrderProducts)
             {
-                _cellService.DeductFromCells(op.ProductId, op.Quantity);
+                try
+                {
+                    _cellService.DeductFromCells(op.ProductId, op.Quantity);
+                }
+                catch(InvalidOperationException e)
+                {
+                    message += $"Товар {op.Product.Name} {op.Quantity} шт.: не растовлен на складе.\n";
+                    
+                }
             }
+            MessageBox.Show(
+                        message,
+                        "Ошибка",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Warning);
 
             // Обновление общего остатка товара
             foreach (var op in Invoice.OrderProducts)
