@@ -40,7 +40,7 @@ namespace Warehouse.ViewModels
                 Id = SelectedOrder.Id,
                 CustomerName = SelectedOrder.CustomerName,
                 OrderDate = SelectedOrder.OrderDate,
-                OrderProducts = new ObservableCollection<OrderProduct>(SelectedOrder.OrderProducts)
+                OrderProducts = SelectedOrder.OrderProducts
             };
 
             var win = new EditOrderWindow(edited);

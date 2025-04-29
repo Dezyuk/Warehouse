@@ -1,4 +1,5 @@
 ﻿using System.Windows.Controls;
+using Warehouse.Models;
 using Warehouse.ViewModels;
 
 namespace Warehouse.Views
