@@ -13,8 +13,10 @@ namespace Warehouse.ViewModels
     {
         private readonly ICellService _cellSvc;
         private readonly IProductService _prodSvc;
+        private readonly PlacementService _placementService;
 
         public ObservableCollection<Cell> Cells { get; }
+        public ObservableCollection<Product> Products { get; }
         public ObservableCollection<Product> AssignedItems { get; }
         public ObservableCollection<Product> UnassignedItems { get; }
 
@@ -38,15 +40,18 @@ namespace Warehouse.ViewModels
         public ICommand SetZoneTypeCommand { get; }
         public ICommand SaveTopologyCommand { get; }
         public ICommand CancelTopologyCommand { get; }
+        public ICommand ArrangeAllStockCommand { get; }
 
-        public TopologyViewModel(ICellService cellSvc, IProductService prodSvc)
+        public TopologyViewModel(ICellService cellSvc, IProductService prodSvc, PlacementService placementService)
         {
             _cellSvc = cellSvc;
             _prodSvc = prodSvc;
+            _placementService = placementService;
 
             // загрузить из БД
             var fromDb = _cellSvc.GetAllCells().ToList();
             Cells = new ObservableCollection<Cell>(fromDb);
+            Products = new ObservableCollection<Product>(_prodSvc.GetAllProducts());
             _originalCells = fromDb.Select(Clone).ToList();
 
             var all = _prodSvc.GetAllProducts().ToList();
@@ -57,7 +62,9 @@ namespace Warehouse.ViewModels
             SetZoneTypeCommand = new RelayCommand<ZoneType>(t => { SelectedZoneType = t; CurrentMode = TopologyMode.ChangeType; });
             SaveTopologyCommand = new RelayCommand(SaveTopology);
             CancelTopologyCommand = new RelayCommand(CancelTopology);
+            ArrangeAllStockCommand = new RelayCommand(ArrangeAllStock);
             InitializeProducts();
+            _placementService = placementService;
         }
 
         public void InitializeProducts()
@@ -192,6 +199,11 @@ namespace Warehouse.ViewModels
             {
                 MessageBox.Show("Эта ячейка уже занята другим товаром или количество превышает лимит.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
+        }
+        public void ArrangeAllStock()
+        {
+            _placementService.PlaceAllProducts(Cells, Products);
+            // После этого Cells автоматически обновятся, и UI перерисует размещение
         }
     }
 }

@@ -15,7 +15,7 @@ namespace Warehouse.ViewModels
             IOrderService orderService,
             IProductService productService,
             ICellService cellService)
-            : base(orderService, productService, initialCustomerName: "Расход")
+            : base(orderService, productService, initialCustomerName: "Расходная накладная")
         {
             _cellService = cellService;
         }

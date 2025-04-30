@@ -11,7 +11,7 @@ namespace Warehouse.ViewModels
         public InboundInvoiceViewModel(
             IOrderService orderService,
             IProductService productService)
-            : base(orderService, productService, initialCustomerName: "Приход")
+            : base(orderService, productService, initialCustomerName: "Приходная накладная")
         {
         }
 

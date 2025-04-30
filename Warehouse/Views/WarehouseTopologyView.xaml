@@ -114,6 +114,9 @@
                         </DataTemplate>
                     </ListBox.ItemTemplate>
                 </ListBox>
+                <Button Content="Разместить товары"
+                        Command="{Binding ArrangeAllStockCommand}" 
+                        Margin="0,10"/>
             </StackPanel>
         </Grid>
     </DockPanel>

@@ -34,6 +34,7 @@ namespace Warehouse
             services.AddScoped<IOrderProductRepository, OrderProductRepository>();
 
             // Регистрация сервисов
+            services.AddSingleton<PlacementService>();
             services.AddScoped<IProductService, ProductService>();
             services.AddScoped<ICellService, CellService>();
             services.AddScoped<IOrderService, OrderService>();
