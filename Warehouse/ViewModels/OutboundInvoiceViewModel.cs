@@ -67,7 +67,7 @@ namespace Warehouse.ViewModels
                 product.Quantity -= op.Quantity;
                 _productService.UpdateProduct(product);
             }
-
+            Invoice.OrderType = false;
             _orderService.AddOrder(Invoice);
             MessageBox.Show("Расходная накладная успешно сохранена", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
 

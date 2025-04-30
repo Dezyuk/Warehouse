@@ -58,5 +58,6 @@ namespace Warehouse.Services
             if (toRemove != null)
                 Orders.Remove(toRemove);
         }
+
     }
 }

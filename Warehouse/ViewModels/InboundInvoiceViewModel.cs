@@ -27,7 +27,7 @@ namespace Warehouse.ViewModels
                     _productService.UpdateProduct(product);
                 }
             }
-
+            Invoice.OrderType = true;
             _orderService.AddOrder(Invoice);
             
             MessageBox.Show("Приходная накладная успешно сохранена", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
