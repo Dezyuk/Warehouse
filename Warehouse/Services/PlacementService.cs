@@ -1,374 +1,364 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using Warehouse.Models;
 
 namespace Warehouse.Services
 {
-    public class PlacementService
+    public interface IPlacementService
+    {
+        void PlaceAllProducts();
+    }
+
+    public class PlacementService : IPlacementService
     {
         private const int MaxPerCell = 1000;
 
-        public void PlaceAllProducts(ObservableCollection<Cell> cells, IEnumerable<Product> products)
-        {
-            var cellMap = cells.ToDictionary(c => (c.X, c.Y));
-            var storageCells = cells.Where(c => c.ZoneType == ZoneType.Storage).ToList();
-            var passageCells = cells.Where(c => c.ZoneType == ZoneType.Passage).ToList();
-            var passageDistances = ComputeDistancesFromSources(passageCells, cellMap);
+        private readonly ICellService _cellService;
+        private readonly IProductService _productService;
+        private readonly IOrderService _orderService;
+        private readonly AbcXyzService _abcXyzService;
 
-            var sortedProducts = products
-                .OrderByDescending(p => p.Quantity)
+        public PlacementService(
+            ICellService cellService,
+            IProductService productService,
+            IOrderService orderService,
+            AbcXyzService abcXyzService)
+        {
+            _cellService = cellService;
+            _productService = productService;
+            _orderService = orderService;
+            _abcXyzService = abcXyzService;
+        }
+
+        public void PlaceAllProducts()
+        {
+            // 1. Остатки - работает заебись
+            var toPlace = ComputeToPlace();
+
+            // 2. Зоны хранения - работает заебись
+            var allCells = _cellService.GetAllCells().ToList();
+            var storageCells = allCells.Where(c => c.ZoneType == ZoneType.Storage).ToList();
+            var zones = ComputeZones(storageCells);
+
+            // 3. Кластеры в каждой зоне - работает заебись
+            var clustersPerZone = zones
+                .Select(zone => ComputeClusters(zone, allCells))
                 .ToList();
 
-            foreach (var product in sortedProducts)
+            // 4. Заполнение существующих кластеров
+            foreach (var stat in _abcXyzService.ClassifyByAbcXyz(_orderService.GetAllOrders()))
             {
-                // Сколько уже размещено
-                int placed = storageCells
-                    .Where(c => c.ProductId == product.Id)
-                    .Sum(c => c.Quantity);
-
-                int remaining = product.Quantity - placed;
-                if (remaining <= 0)
+                if (!toPlace.TryGetValue(stat.ProductId, out var remaining) || remaining <= 0)
                     continue;
 
-                var existing = storageCells
-                    .Where(c => c.ProductId == product.Id)
-                    .ToList();
+                // 4.1 Существующие кластеры
+                remaining = FillExistingClusters(stat.ProductId, clustersPerZone, remaining);
 
-                // 1. Если товар уже размещён – продолжить рядом
-                if (existing.Any())
-                {
-                    while (remaining > 0)
-                    {
-                        // Найти соседнюю линию
-                        var adjLine = FindAdjacentColumn(existing, storageCells, passageDistances);
-                        if (adjLine != null)
-                        {
-                            FillLine(adjLine, product, ref remaining);
-                            existing.AddRange(adjLine);
-                            continue;
-                        }
-
-                        // Иначе – одиночная соседняя ячейка
-                        var neighbor = SelectBestNeighbor(existing, storageCells, cellMap, passageDistances);
-                        if (neighbor != null)
-                        {
-                            int chunk = Math.Min(remaining, MaxPerCell);
-                            neighbor.ProductId = product.Id;
-                            neighbor.Product = product;
-                            neighbor.Quantity = chunk;
-                            remaining -= chunk;
-                            existing.Add(neighbor);
-                            continue;
-                        }
-
-                        break; // если негде разместить рядом
-                    }
-                }
-
-                // 2. Если всё ещё есть остаток – новые полные линии
+                // 5. Новые кластеры
                 if (remaining > 0)
-                {
-                    var lines = FindFullLines(storageCells, passageCells, passageDistances);
-                    foreach (var line in lines)
-                    {
-                        if (remaining <= 0) break;
-                        FillLine(line, product, ref remaining);
-                    }
-                }
+                    remaining = FillNewClusters(stat.ProductId, stat.Priority, clustersPerZone, remaining, allCells);
 
-                // 3. В крайний случай – любые свободные ячейки
-                while (remaining > 0)
-                {
-                    int chunk = Math.Min(remaining, MaxPerCell);
-                    var target = storageCells
-                        .Where(c => c.ProductId == null && passageDistances.ContainsKey((c.X, c.Y)))
-                        .OrderByDescending(c => passageDistances[(c.X, c.Y)])
-                        .FirstOrDefault()
-                        ?? storageCells.FirstOrDefault(c => c.ProductId == null);
+                // 6. Фолбэк одиночные
+                if (remaining > 0)
+                    remaining = FillSingleCells(stat.ProductId, storageCells, remaining, allCells);
 
-                    if (target == null)
-                        throw new InvalidOperationException("Недостаточно ячеек.");
-
-                    target.ProductId = product.Id;
-                    target.Product = product;
-                    target.Quantity = chunk;
-                    remaining -= chunk;
-                }
+                if (remaining > 0)
+                    throw new InvalidOperationException($"Не удалось разместить товар {stat.ProductId}. Осталось {remaining} шт.");
             }
+
         }
 
-        // 1. Формируем все полные линии от дальней точки до проезда
-        private List<List<Cell>> FindFullLines(
-    List<Cell> storageCells,
-    List<Cell> passageCells,
-    Dictionary<(int, int), int> passageDistances)
+        /// <summary>
+        /// Вычисляет, сколько единиц каждого товара нужно разместить,
+        /// учитывая текущие заполняемые Storage ячейки и общий запас.
+        /// </summary>
+        private Dictionary<int, int> ComputeToPlace()
         {
-            var lines = new List<List<Cell>>();
-            foreach (var passage in passageCells)
+            // Получаем все Storage ячейки
+            var allCells = _cellService.GetAllCells()
+                .Where(c => c.ZoneType == ZoneType.Storage)
+                .ToList();
+
+            // Считаем, сколько каждой единицы уже размещено
+            var placed = allCells
+                .Where(c => c.ProductId.HasValue)
+                .GroupBy(c => c.ProductId!.Value)
+                .ToDictionary(
+                    g => g.Key,
+                    g => g.Sum(c => c.Quantity)
+                );
+
+            // Берём текущие товары с общим количеством на складе
+            var products = _productService.GetAllProducts().ToList();
+
+            var toPlace = new Dictionary<int, int>();
+            foreach (var product in products)
             {
-                foreach (var dir in new[] { (1, 0), (-1, 0), (0, 1), (0, -1) })
+                var totalQty = product.Quantity;
+                var placedQty = placed.GetValueOrDefault(product.Id, 0);
+                var need = totalQty - placedQty;
+                if (need > 0)
+                    toPlace[product.Id] = need;
+            }
+
+            return toPlace;
+        }
+        private List<List<Cell>> ComputeZones(List<Cell> storageCells)
+        {
+            var visited = new HashSet<(int x, int y)>();
+            var zones = new List<List<Cell>>();
+
+            foreach (var cell in storageCells)
+            {
+                var key = (cell.X, cell.Y);
+                if (visited.Contains(key))
+                    continue;
+
+                var zone = new List<Cell>();
+                var stack = new Stack<Cell>();
+                stack.Push(cell);
+                visited.Add(key);
+
+                while (stack.Count > 0)
+                {
+                    var current = stack.Pop();
+                    zone.Add(current);
+
+                    var neighbors = storageCells.Where(c =>
+                        !visited.Contains((c.X, c.Y)) &&
+                        ((Math.Abs(c.X - current.X) == 1 && c.Y == current.Y) ||
+                         (Math.Abs(c.Y - current.Y) == 1 && c.X == current.X)));
+
+                    foreach (var neighbor in neighbors)
+                    {
+                        visited.Add((neighbor.X, neighbor.Y));
+                        stack.Push(neighbor);
+                    }
+                }
+
+                zones.Add(zone);
+            }
+
+            return zones;
+        }
+
+        /// <summary>
+        /// Разбивает зону на линейные кластеры,
+        /// обходя от каждой Passage-ячейки вдоль прямой.
+        /// Остальные ячейки группирует как отдельные "мертвые зоны" по связности.
+        /// </summary>
+        private List<List<Cell>> ComputeClusters(List<Cell> zone, List<Cell> allCells)
+        {
+            var storageSet = new HashSet<(int, int)>(zone.Select(c => (c.X, c.Y)));
+            var assigned = new HashSet<(int, int)>();
+            var clusters = new List<List<Cell>>();
+
+            // Шаг: для каждой Passage-ячейки
+            foreach (var p in allCells.Where(c => c.ZoneType == ZoneType.Passage))
+            {
+                // для каждого из 4 направлений
+                var dirs = new[] { (1, 0), (-1, 0), (0, 1), (0, -1) };
+                foreach (var (dx, dy) in dirs)
                 {
                     var line = new List<Cell>();
-                    int step = 1;
-                    while (true)
+                    var x = p.X + dx;
+                    var y = p.Y + dy;
+                    // если сосед — Storage
+                    while (storageSet.Contains((x, y)) && !assigned.Contains((x, y)))
                     {
-                        var coord = (passage.X + dir.Item1 * step, passage.Y + dir.Item2 * step);
-                        var cell = storageCells.FirstOrDefault(c => (c.X, c.Y) == coord && c.ProductId == null);
-                        if (cell == null || cell.ZoneType == ZoneType.Passage) break; // Исключаем проезды
-
-                        var tempLine = line.Append(cell).ToList();
-                        if (!CheckNoBlockage(tempLine, storageCells, passageCells)) break;
-
+                        var cell = zone.First(c => c.X == x && c.Y == y);
                         line.Add(cell);
-                        step++;
+                        assigned.Add((x, y));
+                        x += dx;
+                        y += dy;
                     }
-                    if (line.Any())
-                        lines.Add(line);
+                    if (line.Any()) clusters.Add(line);
                 }
             }
 
-            // Сортируем линии, чтобы дальше от проезда были первыми
-            return lines
-                .Select(l => new { Line = l, MinDist = l.Min(c => passageDistances.GetValueOrDefault((c.X, c.Y), 0)) })
-                .OrderByDescending(x => x.MinDist)
-                .Select(x => x.Line)
+            // Группируем оставшиеся ячейки в "мертвые зоны" по связности
+            var deadCells = zone
+                .Where(c => !assigned.Contains((c.X, c.Y)))
                 .ToList();
+            var deadZones = ComputeZones(deadCells);
+            foreach (var dz in deadZones)
+                clusters.Add(dz);
+
+            return clusters;
         }
-
-        // 2. Поиск соседнего столбца или ряда у уже размещённых
-        private List<Cell>? FindAdjacentColumn(
-    List<Cell> existing,
-    List<Cell> allStorageCells,
-    Dictionary<(int, int), int> passageDistances)
+        private int FillExistingClusters(int productId, List<List<List<Cell>>> clustersPerZone, int remaining)
         {
-            var directions = new (int dx, int dy)[]
+            foreach (var zoneClusters in clustersPerZone)
             {
-        (0, -1), (0, 1) // вверх, вниз
-            };
-
-            foreach (var cell in existing)
-            {
-                foreach (var (dx, dy) in directions)
+                foreach (var cluster in zoneClusters)
                 {
-                    var group = GetVerticalLine(cell.X, cell.Y + dy, allStorageCells);
-                    if (group.Count > 0 && group.All(c => c.ProductId == null))
+                    if (cluster.Any(c => c.ProductId == productId))
                     {
-                        // Сортируем по расстоянию до ближайшего товара того же типа
-                        var sortedGroup = group
-                            .OrderBy(c => GetDistanceToNearestProduct(existing, c, allStorageCells))
-                            .ThenBy(c => passageDistances.GetValueOrDefault((c.X, c.Y), int.MaxValue))
-                            .ToList();
-
-                        return sortedGroup;
+                        remaining = FillCluster(cluster, productId, remaining);
+                        if (remaining == 0) return 0;
                     }
                 }
             }
-
-            return null;
+            return remaining;
         }
 
-        private int GetDistanceToNearestProduct(List<Cell> existing, Cell target, List<Cell> allStorageCells)
+        private int FillNewClusters(
+    int productId,
+    double priority,
+    List<List<List<Cell>>> clustersPerZone,
+    int remaining,
+    List<Cell> allCells)
         {
-            // Находим все ячейки с тем же товаром, что и в alreadyPlaced
-            var productCells = existing.Where(c => c.ProductId == target.ProductId).ToList();
-
-            // Если таких ячеек нет, возвращаем максимальное значение
-            if (!productCells.Any()) return int.MaxValue;
-
-            // Ищем минимальное расстояние до ячейки с товаром
-            int minDistance = int.MaxValue;
-            foreach (var cell in productCells)
-            {
-                int dist = Math.Abs(cell.X - target.X) + Math.Abs(cell.Y - target.Y);
-                minDistance = Math.Min(minDistance, dist);
-            }
-
-            return minDistance;
-        }
-
-
-        private List<Cell> GetVerticalLine(int startX, int startY, List<Cell> storageCells)
-        {
-            var line = new List<Cell>();
-
-            // Ищем все ячейки по вертикали (вверх и вниз от начальной точки)
-            var directions = new[] { 1, -1 }; // вниз и вверх
-
-            foreach (var direction in directions)
-            {
-                int x = startX;
-                int y = startY;
-                while (true)
-                {
-                    y += direction;
-                    var cell = storageCells.FirstOrDefault(c => c.X == x && c.Y == y);
-                    if (cell == null || cell.ProductId != null) break; // Прерываем, если ячейка занята или не существует
-                    line.Add(cell);
-                }
-            }
-
-            return line;
-        }
-        // Заполнение линии ячеек чанками
-        private void FillLine(List<Cell> line, Product product, ref int remaining)
-        {
-            var continuousEmptyCells = new List<Cell>();
-
-            foreach (var cell in line)
-            {
-                if (cell.ProductId == null)
-                {
-                    continuousEmptyCells.Add(cell);
-                }
-                else
-                {
-                    if (continuousEmptyCells.Count > 0)
-                    {
-                        break;
-                    }
-                }
-            }
-
-            // Сортируем ячейки по минимальному расстоянию от уже размещенного товара
-            continuousEmptyCells = continuousEmptyCells
-                .OrderBy(c => GetDistanceToNearestProduct(line, c, line))
+            // Выбираем только пустые кластеры (все ячейки свободны)
+            var emptyClusters = clustersPerZone
+                .SelectMany(zoneClusters => zoneClusters)
+                .Where(cluster => cluster.All(c => c.ProductId == null))
                 .ToList();
 
-            foreach (var cell in continuousEmptyCells)
-            {
-                if (remaining <= 0) break;
+            // Получаем все ячейки зоны отгрузки
+            var shippingCells = allCells
+                .Where(c => c.ZoneType == ZoneType.ShippingArea)
+                .ToList();
 
-                int chunk = Math.Min(remaining, MaxPerCell);
-                cell.ProductId = product.Id;
-                cell.Product = product;
-                cell.Quantity = chunk;
-                remaining -= chunk;
-            }
-        }
+            // Функция вычисления Манхэттенского расстояния
+            int ManhattanDistance(Cell a, Cell b) =>
+                Math.Abs(a.X - b.X) + Math.Abs(a.Y - b.Y);
 
-
-
-
-        // Поиск лучшей соседней ячейки
-        private Cell? SelectBestNeighbor(
-    List<Cell> existing,
-    List<Cell> storageCells,
-    Dictionary<(int, int), Cell> cellMap,
-    Dictionary<(int, int), int> passageDistances)
-        {
-            var neighbors = new HashSet<Cell>();
-            foreach (var c in existing)
-                foreach (var n in GetNeighbors(c, cellMap))
-                    if (n.ZoneType == ZoneType.Storage && n.ProductId == null)
-                        neighbors.Add(n); // Исключаем проезды
-
-            return neighbors
-                .Where(c => passageDistances.ContainsKey((c.X, c.Y)))
-                .OrderByDescending(c => passageDistances[(c.X, c.Y)])
-                .FirstOrDefault();
-        }
-
-        // Проверка, что нет блокировки путей
-        private bool CheckNoBlockage(
-            List<Cell> line,
-            List<Cell> storageCells,
-            List<Cell> passageCells)
-        {
-            var productId = line.FirstOrDefault()?.ProductId;
-            var map = storageCells.Concat(passageCells).ToDictionary(c => (c.X, c.Y), c => c);
-
-            return line.All(target =>
-            {
-                var visited = new HashSet<Cell>();
-                var queue = new Queue<Cell>(passageCells);
-
-                while (queue.Count > 0)
+            // Сортируем кластеры: сначала ближе к отгрузке
+            var sortedClusters = emptyClusters
+                .Select(cluster => new
                 {
-                    var cur = queue.Dequeue();
-                    foreach (var n in GetNeighbors(cur, map))
-                    {
-                        if (visited.Contains(n)) continue;
-                        if (n == target) return true;
+                    Cluster = cluster,
+                    MinDistToShipping = cluster.Min(cell =>
+                        shippingCells.Min(ship => ManhattanDistance(cell, ship)))
+                })
+                .OrderBy(x => x.MinDistToShipping)
+                .Select(x => x.Cluster)
+                .ToList();
 
-                        bool canPass = n.ZoneType == ZoneType.Storage &&
-                                       (n.ProductId == null || n.ProductId == productId || n == target);
+            // Получаем продукт
+            var product = _productService.GetProductById(productId);
 
-                        if (canPass)
-                        {
-                            visited.Add(n);
-                            queue.Enqueue(n);
-                        }
-                    }
+            foreach (var cluster in sortedClusters)
+            {
+                foreach (var cell in cluster.AsEnumerable().Reverse()) // от дальнего конца
+                {
+                    if (remaining <= 0) break;
+
+                    var toPlace = Math.Min(MaxPerCell, remaining);
+                    cell.ProductId = productId;
+                    cell.Product = product;
+                    cell.Quantity = toPlace;
+                    _cellService.UpdateCell(cell);
+                    remaining -= toPlace;
                 }
-                return false;
-            });
+
+                if (remaining <= 0)
+                    break;
+            }
+
+            return remaining;
         }
 
-        // Достижимость от проезда через пустые хран. ячейки
-        private bool IsReachableFromPassage(
-            Cell target,
-            Dictionary<(int, int), Cell> map)
+
+
+        private int FillSingleCells(int productId, List<Cell> storageCells, int remaining, List<Cell> allCells)
         {
-            var visited = new HashSet<Cell>();
-            var queue = new Queue<Cell>(map.Values.Where(c => c.ZoneType == ZoneType.Passage));
+            var free = storageCells
+                .Where(c => c.ProductId == null)
+                .OrderBy(c => Math.Abs(c.X) + Math.Abs(c.Y)) // приближённая сортировка
+                .ToList();
+            foreach (var cell in free)
+            {
+                if (remaining == 0) break;
+
+                if (!IsCellReachable(cell, allCells))
+                    continue;
+
+                var take = Math.Min(MaxPerCell, remaining);
+                cell.ProductId = productId;
+                cell.Product = _productService.GetProductById(productId);
+                cell.Quantity = take;
+                _cellService.UpdateCell(cell);
+                remaining -= take;
+            }
+            return remaining;
+        }
+
+        private int FillCluster(List<Cell> cluster, int productId, int remaining)
+        {
+            foreach (var cell in cluster.OrderByDescending(c => c.X + c.Y))
+            {
+                if (remaining == 0) break;
+                var canTake = Math.Min(MaxPerCell - cell.Quantity, remaining);
+                if (canTake <= 0) continue;
+                cell.ProductId = productId;
+                cell.Product = _productService.GetProductById(productId);
+                cell.Quantity += canTake;
+                _cellService.UpdateCell(cell);
+                remaining -= canTake;
+            }
+            return remaining;
+        }
+
+        private bool IsCellReachable(Cell target, List<Cell> allCells)
+        {
+            var width = allCells.Max(c => c.X) + 1;
+            var height = allCells.Max(c => c.Y) + 1;
+
+            var grid = new Cell[width, height];
+            foreach (var cell in allCells)
+                grid[cell.X, cell.Y] = cell;
+
+            var visited = new HashSet<(int x, int y)>();
+            var queue = new Queue<(int x, int y)>();
+
+            // старт из всех Passage-ячееек
+            foreach (var start in allCells.Where(c => c.ZoneType == ZoneType.Passage))
+            {
+                queue.Enqueue((start.X, start.Y));
+                visited.Add((start.X, start.Y));
+            }
+
             while (queue.Count > 0)
             {
-                var cur = queue.Dequeue();
-                foreach (var n in GetNeighbors(cur, map))
+                var (x, y) = queue.Dequeue();
+                if (x == target.X && y == target.Y)
+                    return true;
+
+                var neighbors = new (int dx, int dy)[]
                 {
-                    if (visited.Contains(n)) continue;
-                    if (n == target) return true;
-                    if (n.ZoneType == ZoneType.Storage && (n.ProductId == null || n == target))
-                    {
-                        visited.Add(n);
-                        queue.Enqueue(n);
-                    }
+            (-1, 0), (1, 0), (0, -1), (0, 1)
+                };
+
+                foreach (var (dx, dy) in neighbors)
+                {
+                    int nx = x + dx;
+                    int ny = y + dy;
+
+                    if (nx < 0 || ny < 0 || nx >= width || ny >= height)
+                        continue;
+
+                    if (visited.Contains((nx, ny)))
+                        continue;
+
+                    var neighbor = grid[nx, ny];
+                    if (neighbor == null)
+                        continue;
+
+                    // Доступны только пустые ячейки типа Storage
+                    bool isPassable = neighbor.ZoneType == ZoneType.Storage && neighbor.ProductId == null;
+                    if (!isPassable && neighbor.ZoneType != ZoneType.Passage)
+                        continue;
+
+                    queue.Enqueue((nx, ny));
+                    visited.Add((nx, ny));
                 }
             }
+
             return false;
         }
 
-        // Четыре ортогональных соседа
-        private IEnumerable<Cell> GetNeighbors(
-            Cell c,
-            Dictionary<(int, int), Cell> map)
-        {
-            var dirs = new (int dx, int dy)[] { (1, 0), (-1, 0), (0, 1), (0, -1) };
-            foreach (var d in dirs)
-                if (map.TryGetValue((c.X + d.dx, c.Y + d.dy), out var n))
-                    yield return n;
-        }
-
-        // Расстояния через BFS от проездов
-        private Dictionary<(int, int), int> ComputeDistancesFromSources(
-            List<Cell> sources,
-            Dictionary<(int, int), Cell> cellMap)
-        {
-            var distances = new Dictionary<(int, int), int>();
-            var queue = new Queue<Cell>();
-            foreach (var s in sources)
-            {
-                distances[(s.X, s.Y)] = 0;
-                queue.Enqueue(s);
-            }
-            while (queue.Count > 0)
-            {
-                var cur = queue.Dequeue();
-                var d0 = distances[(cur.X, cur.Y)];
-                foreach (var n in GetNeighbors(cur, cellMap))
-                {
-                    var key = (n.X, n.Y);
-                    if (distances.ContainsKey(key)) continue;
-                    if (n.ZoneType == ZoneType.Passage || (n.ZoneType == ZoneType.Storage && n.ProductId == null))
-                    {
-                        distances[key] = d0 + 1;
-                        queue.Enqueue(n);
-                    }
-                }
-            }
-            return distances;
-        }
     }
 }

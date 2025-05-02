@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Warehouse.Data.Repositories;
 using Warehouse.Models;
 
@@ -21,10 +19,12 @@ namespace Warehouse.Services
         {
             return _cellRepository.GetAllCells();
         }
+
         public Cell? GetCellById(int id)
         {
             return _cellRepository.GetCellById(id);
         }
+
         public Cell? GetCellByProduct(int id)
         {
             return _cellRepository.GetCellByProduct(id);
@@ -53,7 +53,6 @@ namespace Warehouse.Services
                 .ToList();
         }
 
-        // Списание из ячеек по логике: сначала из тех, где меньше всего
         public void DeductFromCells(int productId, int quantity)
         {
             var toDeduct = quantity;
@@ -64,7 +63,7 @@ namespace Warehouse.Services
                 if (toDeduct <= 0)
                     break;
 
-                var take = System.Math.Min(cell.Quantity, toDeduct);
+                var take = Math.Min(cell.Quantity, toDeduct);
                 cell.Quantity -= take;
                 toDeduct -= take;
                 if (cell.Quantity == 0)
@@ -80,27 +79,25 @@ namespace Warehouse.Services
                 throw new InvalidOperationException($"Не удалось списать {quantity} шт.: осталось {toDeduct} шт. в ячейках.");
         }
 
-
         private Dictionary<int, string> _productColors = new();
-
         private Random _random = new Random();
 
         private string GetRandomColor()
         {
-            return $"#{_random.Next(0x1000000):X6}"; // случайный цвет
+            return $"#{_random.Next(0x1000000):X6}";
         }
 
         public void AssignColorsToProductCells(IEnumerable<Cell> cells)
         {
-
             foreach (var cell in cells)
             {
                 if (cell.ProductId == null)
                 {
-                    cell.FillColor = null; // нет товара — нет цвета
+                    cell.FillColor = null;
                     continue;
                 }
-                if(cell.FillColor != null)
+
+                if (cell.FillColor != null)
                 {
                     _productColors[cell.ProductId.Value] = cell.FillColor;
                 }
@@ -114,5 +111,48 @@ namespace Warehouse.Services
             }
         }
 
+        // 🔷 Новый метод: разделение на изолированные зоны хранения
+        public List<List<Cell>> GetSeparatedStorageZones()
+        {
+            var allCells = _cellRepository.GetAllCells().ToList();
+            var storageCells = allCells
+                .Where(c => c.ZoneType == ZoneType.Storage)
+                .ToList();
+
+            var visited = new HashSet<(int, int)>();
+            var zones = new List<List<Cell>>();
+
+            foreach (var cell in storageCells)
+            {
+                if (visited.Contains((cell.X, cell.Y)))
+                    continue;
+
+                var zone = new List<Cell>();
+                var queue = new Queue<Cell>();
+                queue.Enqueue(cell);
+                visited.Add((cell.X, cell.Y));
+
+                while (queue.Count > 0)
+                {
+                    var current = queue.Dequeue();
+                    zone.Add(current);
+
+                    var neighbors = storageCells.Where(c =>
+                        !visited.Contains((c.X, c.Y)) &&
+                        ((Math.Abs(c.X - current.X) == 1 && c.Y == current.Y) ||
+                         (Math.Abs(c.Y - current.Y) == 1 && c.X == current.X)));
+
+                    foreach (var neighbor in neighbors)
+                    {
+                        visited.Add((neighbor.X, neighbor.Y));
+                        queue.Enqueue(neighbor);
+                    }
+                }
+
+                zones.Add(zone);
+            }
+
+            return zones;
+        }
     }
 }

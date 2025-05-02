@@ -18,5 +18,6 @@ namespace Warehouse.Services
         IEnumerable<Cell> GetCellsByProduct(int productId);
         void DeductFromCells(int productId, int quantity);
         void AssignColorsToProductCells(IEnumerable<Cell> cells);
+        public List<List<Cell>> GetSeparatedStorageZones();
     }
 }

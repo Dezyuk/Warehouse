@@ -14,11 +14,14 @@ namespace Warehouse.ViewModels
         private readonly ICellService _cellSvc;
         private readonly IProductService _prodSvc;
         private readonly PlacementService _placementService;
+        private readonly AbcXyzService _abc;
+
 
         public ObservableCollection<Cell> Cells { get; }
         public ObservableCollection<Product> Products { get; }
         public ObservableCollection<Product> AssignedItems { get; }
         public ObservableCollection<Product> UnassignedItems { get; }
+        public ObservableCollection<Order> Orders { get; } = new();
 
         private TopologyMode _currentMode = TopologyMode.View;
         public TopologyMode CurrentMode
@@ -42,11 +45,12 @@ namespace Warehouse.ViewModels
         public ICommand CancelTopologyCommand { get; }
         public ICommand ArrangeAllStockCommand { get; }
 
-        public TopologyViewModel(ICellService cellSvc, IProductService prodSvc, PlacementService placementService)
+        public TopologyViewModel(ICellService cellSvc, IProductService prodSvc, PlacementService placementService, AbcXyzService abc)
         {
             _cellSvc = cellSvc;
             _prodSvc = prodSvc;
             _placementService = placementService;
+            _abc = abc;
 
             // загрузить из БД
             var fromDb = _cellSvc.GetAllCells().ToList();
@@ -65,6 +69,7 @@ namespace Warehouse.ViewModels
             ArrangeAllStockCommand = new RelayCommand(ArrangeAllStock);
             InitializeProducts();
             _placementService = placementService;
+            _abc = abc;
         }
 
         public void InitializeProducts()
@@ -202,7 +207,10 @@ namespace Warehouse.ViewModels
         }
         public void ArrangeAllStock()
         {
-            _placementService.PlaceAllProducts(Cells, Products);
+            var historicalOrders = Orders.Where(o => o.OrderDate < DateTime.UtcNow.AddMonths(-1)).ToList();
+
+            // Выполняем размещение
+            _placementService.PlaceAllProducts();
             // После этого Cells автоматически обновятся, и UI перерисует размещение
         }
     }
