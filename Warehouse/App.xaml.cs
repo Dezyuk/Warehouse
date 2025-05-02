@@ -34,9 +34,7 @@ namespace Warehouse
             services.AddScoped<IOrderProductRepository, OrderProductRepository>();
 
             // Регистрация сервисов
-            services.AddSingleton<StorageZoneService>();
             services.AddScoped<AbcXyzService>();
-            services.AddScoped<ILineDirectionService, LineDirectionService>();
             services.AddScoped<PlacementService>();
             services.AddScoped<IProductService, ProductService>();
             services.AddScoped<ICellService, CellService>();
@@ -45,7 +43,6 @@ namespace Warehouse
 
             // Регистрация ViewModel
             services.AddSingleton<ProductViewModel>();
-            //services.AddSingleton<OrderViewModel>();
             services.AddSingleton<OutboundInvoiceViewModel>();
             
             services.AddSingleton<InboundInvoiceViewModel>();
@@ -59,14 +56,6 @@ namespace Warehouse
             services.AddSingleton<ProductView>();
             services.AddSingleton<WarehouseTopologyView>();
             services.AddTransient<InvoiceHistoryView>();
-            // приходная накладная
-            //services.AddTransient<InvoiceView>(sp =>
-            //    new InvoiceView(sp.GetRequiredService<InboundInvoiceViewModel>()));
-
-            //// расходная накладная
-            //services.AddTransient<InvoiceView>(sp =>
-            //    new InvoiceView(sp.GetRequiredService<OutboundInvoiceViewModel>()));
-
             
 
 

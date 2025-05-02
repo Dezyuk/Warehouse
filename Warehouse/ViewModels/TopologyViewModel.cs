@@ -14,7 +14,6 @@ namespace Warehouse.ViewModels
         private readonly ICellService _cellSvc;
         private readonly IProductService _prodSvc;
         private readonly PlacementService _placementService;
-        private readonly AbcXyzService _abc;
 
 
         public ObservableCollection<Cell> Cells { get; }
@@ -45,12 +44,11 @@ namespace Warehouse.ViewModels
         public ICommand CancelTopologyCommand { get; }
         public ICommand ArrangeAllStockCommand { get; }
 
-        public TopologyViewModel(ICellService cellSvc, IProductService prodSvc, PlacementService placementService, AbcXyzService abc)
+        public TopologyViewModel(ICellService cellSvc, IProductService prodSvc, PlacementService placementService)
         {
             _cellSvc = cellSvc;
             _prodSvc = prodSvc;
             _placementService = placementService;
-            _abc = abc;
 
             // загрузить из БД
             var fromDb = _cellSvc.GetAllCells().ToList();
@@ -69,7 +67,6 @@ namespace Warehouse.ViewModels
             ArrangeAllStockCommand = new RelayCommand(ArrangeAllStock);
             InitializeProducts();
             _placementService = placementService;
-            _abc = abc;
         }
 
         public void InitializeProducts()
