@@ -8,10 +8,10 @@ using Warehouse.Views; // Здесь находится реализация Rel
 
 namespace Warehouse.ViewModels
 {
-    /// <summary>
-    /// ViewModel для управления списком товаров.
-    /// Обеспечивает загрузку данных, выбор продукта и выполнение операций CRUD через команды.
-    /// </summary>
+    
+    // ViewModel для управления списком товаров.
+    // Обеспечивает загрузку данных, выбор продукта и выполнение операций CRUD через команды.
+    
     public class ProductViewModel : BaseViewModel
     {
         // Сервис для работы с данными продуктов (через репозиторий)
@@ -39,10 +39,10 @@ namespace Warehouse.ViewModels
         public ICommand UpdateCommand { get; }
         public ICommand DeleteCommand { get; }
 
-        /// <summary>
-        /// Конструктор ProductViewModel получает IProductService через DI.
-        /// Инициализируются команды и загружается список товаров.
-        /// </summary>
+        
+        // Конструктор ProductViewModel получает IProductService через DI.
+        // Инициализируются команды и загружается список товаров.
+        
         public ProductViewModel(IProductService productService)
         {
             _productService = productService;
@@ -57,9 +57,9 @@ namespace Warehouse.ViewModels
             LoadProducts();
         }
 
-        /// <summary>
-        /// Загружает все товары из сервиса в ObservableCollection.
-        /// </summary>
+        
+        // Загружает все товары из сервиса в ObservableCollection.
+        
         private void LoadProducts()
         {
             Products.Clear();
@@ -69,11 +69,11 @@ namespace Warehouse.ViewModels
             }
         }
 
-        /// <summary>
-        /// Добавляет новый товар.
-        /// Открывается модальное окно (ProductEditWindow), где пользователь вводит данные.
-        /// После подтверждения новый товар сохраняется через сервис, и список обновляется.
-        /// </summary>
+        
+        // Добавляет новый товар.
+        // Открывается модальное окно (ProductEditWindow), где пользователь вводит данные.
+        // После подтверждения новый товар сохраняется через сервис, и список обновляется.
+        
         private void AddProduct()
         {
             // Создаем пустой объект товара
@@ -88,11 +88,11 @@ namespace Warehouse.ViewModels
             }
         }
 
-        /// <summary>
-        /// Редактирует выбранный товар.
-        /// Создается копия выбранного товара для редактирования, чтобы не менять данные напрямую.
-        /// Открывается модальное окно для редактирования, после чего изменения сохраняются.
-        /// </summary>
+        
+        // Редактирует выбранный товар.
+        // Создается копия выбранного товара для редактирования, чтобы не менять данные напрямую.
+        // Открывается модальное окно для редактирования, после чего изменения сохраняются.
+       
         private void UpdateProduct()
         {
             if (SelectedProduct == null)
@@ -116,10 +116,10 @@ namespace Warehouse.ViewModels
             }
         }
 
-        /// <summary>
-        /// Удаляет выбранный товар.
-        /// Вызывает удаление через сервис и обновляет список.
-        /// </summary>
+        
+        // Удаляет выбранный товар.
+        // Вызывает удаление через сервис и обновляет список.
+        
         private void DeleteProduct()
         {
             if (SelectedProduct == null)

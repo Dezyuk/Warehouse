@@ -1,11 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.Metrics;
+using System.Diagnostics.PerformanceData;
 using System.Linq;
 using Warehouse.Models;
 
 namespace Warehouse.Services
 {
+    class CellCluster
+    {
+        public List<Cell> Cells { get; set; }
+        public ClusterType Type { get; set; } // Normal, Blocked
+        
+    }
+    enum ClusterType
+    {
+        Normal,
+        Blocked
+    }
     public interface IPlacementService
     {
         void PlaceAllProducts();
@@ -53,14 +65,14 @@ namespace Warehouse.Services
                 if (!toPlace.TryGetValue(stat.ProductId, out var remaining) || remaining <= 0)
                     continue;
 
-                // 4.1 Существующие кластеры
+                // 4.1 Существующие кластеры - Работает
                 remaining = FillExistingClusters(stat.ProductId, clustersPerZone, remaining);
 
-                // 5. Новые кластеры
-                if (remaining > 0)
+                // 5. Новые кластеры - работает
+                if (remaining > MaxPerCell)
                     remaining = FillNewClusters(stat.ProductId, clustersPerZone, remaining, allCells);
 
-                // 6. Фолбэк одиночные
+                // 6. Фолбэк одиночные - нужно доработать
                 if (remaining > 0)
                     remaining = FillSingleCells(stat.ProductId, storageCells, remaining, allCells);
 
@@ -70,10 +82,10 @@ namespace Warehouse.Services
 
         }
 
-        /// <summary>
-        /// Вычисляет, сколько единиц каждого товара нужно разместить,
-        /// учитывая текущие заполняемые Storage ячейки и общий запас.
-        /// </summary>
+        
+        // Вычисляет, сколько единиц каждого товара нужно разместить,
+        // учитывая текущие заполняемые Storage ячейки и общий запас.
+        
         private Dictionary<int, int> ComputeToPlace()
         {
             // Получаем все Storage ячейки
@@ -144,16 +156,12 @@ namespace Warehouse.Services
             return zones;
         }
 
-        /// <summary>
-        /// Разбивает зону на линейные кластеры,
-        /// обходя от каждой Passage-ячейки вдоль прямой.
-        /// Остальные ячейки группирует как отдельные "мертвые зоны" по связности.
-        /// </summary>
-        private List<List<Cell>> ComputeClusters(List<Cell> zone, List<Cell> allCells)
+        
+        private List<CellCluster> ComputeClusters(List<Cell> zone, List<Cell> allCells)
         {
             var storageSet = new HashSet<(int, int)>(zone.Select(c => (c.X, c.Y)));
             var assigned = new HashSet<(int, int)>();
-            var clusters = new List<List<Cell>>();
+            var clusters = new List<CellCluster>();
 
             // Шаг: для каждой Passage-ячейки
             foreach (var p in allCells.Where(c => c.ZoneType == ZoneType.Passage))
@@ -162,19 +170,23 @@ namespace Warehouse.Services
                 var dirs = new[] { (1, 0), (-1, 0), (0, 1), (0, -1) };
                 foreach (var (dx, dy) in dirs)
                 {
-                    var line = new List<Cell>();
-                    var x = p.X + dx;
+                    var line = new CellCluster
+                    {
+                        Cells = new List<Cell>(),
+                        Type = ClusterType.Normal
+                    };
+                    var x = p.X + dx;   
                     var y = p.Y + dy;
                     // если сосед — Storage
                     while (storageSet.Contains((x, y)) && !assigned.Contains((x, y)))
                     {
                         var cell = zone.First(c => c.X == x && c.Y == y);
-                        line.Add(cell);
+                        line.Cells.Add(cell);
                         assigned.Add((x, y));
                         x += dx;
                         y += dy;
                     }
-                    if (line.Any()) clusters.Add(line);
+                    if (line.Cells.Any()) clusters.Add(line);
                 }
             }
 
@@ -184,17 +196,25 @@ namespace Warehouse.Services
                 .ToList();
             var deadZones = ComputeZones(deadCells);
             foreach (var dz in deadZones)
-                clusters.Add(dz);
+            {
+                var line = new CellCluster
+                {
+                    Cells = dz,
+                    Type = ClusterType.Blocked
+                };
+                clusters.Add(line);
+            }
+                
 
             return clusters;
         }
-        private int FillExistingClusters(int productId, List<List<List<Cell>>> clustersPerZone, int remaining)
+        private int FillExistingClusters(int productId, List<List<CellCluster>> clustersPerZone, int remaining)
         {
             foreach (var zoneClusters in clustersPerZone)
             {
                 foreach (var cluster in zoneClusters)
                 {
-                    if (cluster.Any(c => c.ProductId == productId))
+                    if (cluster.Cells.Any(c => c.ProductId == productId))
                     {
                         remaining = FillCluster(cluster, productId, remaining);
                         if (remaining == 0) return 0;
@@ -204,16 +224,12 @@ namespace Warehouse.Services
             return remaining;
         }
 
-        private int FillNewClusters(
-    int productId,
-    List<List<List<Cell>>> clustersPerZone,
-    int remaining,
-    List<Cell> allCells)
+        private int FillNewClusters(int productId,List<List<CellCluster>> clustersPerZone,int remaining, List<Cell> allCells)
         {
             // Выбираем только пустые кластеры (все ячейки свободны)
             var emptyClusters = clustersPerZone
                 .SelectMany(zoneClusters => zoneClusters)
-                .Where(cluster => cluster.All(c => c.ProductId == null))
+                .Where(cluster => cluster.Cells.All(c => c.ProductId == null) && cluster.Type == ClusterType.Normal /*&& ((remaining / MaxPerCell) >= (cluster.Cells.Count * MaxPerCell * 0.6))*/)
                 .ToList();
 
             // Получаем все ячейки зоны отгрузки
@@ -230,7 +246,7 @@ namespace Warehouse.Services
                 .Select(cluster => new
                 {
                     Cluster = cluster,
-                    MinDistToShipping = cluster.Min(cell =>
+                    MinDistToShipping = cluster.Cells.Min(cell =>
                         shippingCells.Min(ship => ManhattanDistance(cell, ship)))
                 })
                 .OrderBy(x => x.MinDistToShipping)
@@ -242,7 +258,7 @@ namespace Warehouse.Services
 
             foreach (var cluster in sortedClusters)
             {
-                foreach (var cell in cluster.AsEnumerable().Reverse()) // от дальнего конца
+                foreach (var cell in cluster.Cells.AsEnumerable().Reverse()) // от дальнего конца
                 {
                     if (remaining <= 0) break;
 
@@ -286,9 +302,9 @@ namespace Warehouse.Services
             return remaining;
         }
 
-        private int FillCluster(List<Cell> cluster, int productId, int remaining)
+        private int FillCluster(CellCluster cluster, int productId, int remaining)
         {
-            foreach (var cell in cluster.OrderByDescending(c => c.X + c.Y))
+            foreach (var cell in cluster.Cells.AsEnumerable().Reverse())
             {
                 if (remaining == 0) break;
                 var canTake = Math.Min(MaxPerCell - cell.Quantity, remaining);

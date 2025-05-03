@@ -10,10 +10,10 @@ using Warehouse.Views;
 
 namespace Warehouse.ViewModels
 {
-    /// <summary>
-    /// Базовый VM для обеих накладных. Здесь объявлены команды,
-    /// общий метод AddProduct, проверка CanSave и метод ResetInvoice.
-    /// </summary>
+    
+    // Базовый VM для обеих накладных. Здесь объявлены команды,
+    // общий метод AddProduct, проверка CanSave и метод ResetInvoice.
+   
     public abstract class InvoiceViewModel : BaseViewModel
     {
         protected readonly IOrderService _orderService;
@@ -93,9 +93,9 @@ namespace Warehouse.ViewModels
 
         private bool CanSaveInvoice() => Invoice.OrderProducts.Any();
 
-        /// <summary>
-        /// Сбрасывает накладную на новую пустую с тем же именем.
-        /// </summary>
+        
+        // Сбрасывает накладную на новую пустую с тем же именем.
+        
         protected void ResetInvoice(string customerName)
         {
             Invoice = new Order
@@ -108,9 +108,9 @@ namespace Warehouse.ViewModels
             ((RelayCommand)SaveInvoiceCommand).RaiseCanExecuteChanged();
         }
 
-        /// <summary>
-        /// Наследники реализуют логику сохранения (пополнение или списание остатков).
-        /// </summary>
+        
+        // Наследники реализуют логику сохранения (пополнение или списание остатков).
+        
         protected abstract void SaveInvoice();
 
         private void EditProduct()

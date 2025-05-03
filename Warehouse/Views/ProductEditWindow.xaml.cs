@@ -3,11 +3,11 @@ using Warehouse.Models;
 
 namespace Warehouse.Views
 {
-    /// <summary>
-    /// Логика взаимодействия для ProductEditWindow.xaml.
-    /// Это окно используется для редактирования или создания товара.
-    /// При открытии DataContext устанавливается равным объекту Product, который редактируется.
-    /// </summary>
+  
+    // Логика взаимодействия для ProductEditWindow.xaml.
+    // Это окно используется для редактирования или создания товара.
+    // При открытии DataContext устанавливается равным объекту Product, который редактируется.
+   
     public partial class ProductEditWindow : Window
     {
         public ProductEditWindow(Product product)

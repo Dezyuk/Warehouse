@@ -6,9 +6,9 @@ using Warehouse.Models;
 
 namespace Warehouse.Views.Converters
 {
-    /// <summary>
-    /// Преобразует ZoneType в цвет клетки.
-    /// </summary>
+ 
+    // Преобразует ZoneType в цвет клетки.
+  
     public class ZoneTypeToBrushConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)

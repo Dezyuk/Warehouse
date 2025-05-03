@@ -5,9 +5,9 @@ using Warehouse.Services;
 
 namespace Warehouse.ViewModels
 {
-    /// <summary>
-    /// Расходная накладная — списывает остатки.
-    /// </summary>
+    
+    // Расходная накладная — списывает остатки.
+    
     public class OutboundInvoiceViewModel : InvoiceViewModel
     {
         private readonly ICellService _cellService;

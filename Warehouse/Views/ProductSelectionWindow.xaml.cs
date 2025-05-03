@@ -7,10 +7,10 @@ using Warehouse.Services;
 
 namespace Warehouse.Views
 {
-    /// <summary>
-    /// Окно выбора товара. Загружает список товаров через IProductService и фильтрует те,
-    /// которые уже выбраны (на основе списка идентификаторов), чтобы не допустить повторного выбора.
-    /// </summary>
+    
+    // Окно выбора товара. Загружает список товаров через IProductService и фильтрует те,
+    // которые уже выбраны (на основе списка идентификаторов), чтобы не допустить повторного выбора.
+    
     public partial class ProductSelectionWindow : Window
     {
         // Коллекция товаров для отображения
@@ -22,11 +22,10 @@ namespace Warehouse.Views
 
         public Product? SelectedProduct { get; private set; }
 
-        /// <summary>
-        /// Конструктор окна.
-        /// </summary>
-        /// <param name="productService">Сервис для работы с товарами.</param>
-        /// <param name="excludedProductIds">Список идентификаторов товаров, которые уже выбраны.</param>
+        
+        // Конструктор окна.
+        
+        
         public ProductSelectionWindow(IProductService productService, System.Collections.Generic.List<int> excludedProductIds = null)
         {
             InitializeComponent();
@@ -36,9 +35,9 @@ namespace Warehouse.Views
             DataContext = this;
         }
 
-        /// <summary>
-        /// Загрузить список товаров, исключая те, что уже выбраны.
-        /// </summary>
+        
+        // Загрузить список товаров, исключая те, что уже выбраны.
+       
         private void LoadProducts()
         {
             Products.Clear();

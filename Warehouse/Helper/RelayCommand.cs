@@ -27,7 +27,7 @@ namespace Warehouse.Helper
         public event EventHandler? CanExecuteChanged;
 
         
-        /// Вызывает обновление CanExecute у всех подписчиков (кнопок).
+        // Вызывает обновление CanExecute у всех подписчиков (кнопок).
         
         public void RaiseCanExecuteChanged()
         {

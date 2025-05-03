@@ -3,9 +3,9 @@ using Warehouse.Services;
 
 namespace Warehouse.ViewModels
 {
-    /// <summary>
-    /// Приходная накладная — пополняет остатки.
-    /// </summary>
+    
+    // Приходная накладная — пополняет остатки.
+    
     public class InboundInvoiceViewModel : InvoiceViewModel
     {
         public InboundInvoiceViewModel(

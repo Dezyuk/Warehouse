@@ -4,9 +4,9 @@ using System.Windows.Data;
 
 namespace Warehouse.Views.Converters
 {
-    /// <summary>
-    /// Преобразует координату (int) в положение на Canvas.
-    /// </summary>
+  
+    // Преобразует координату (int) в положение на Canvas.
+   
     public class CoordToPosConverter : IValueConverter
     {
         private const double Size = 50.0;

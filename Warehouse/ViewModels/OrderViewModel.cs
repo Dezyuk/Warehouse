@@ -9,25 +9,25 @@ using Warehouse.Views;
 
 namespace Warehouse.ViewModels
 {
-    /// <summary>
-    /// ViewModel для управления заказами.
-    /// Позволяет создавать новый заказ, добавлять в него товары через OrderProduct,
-    /// редактировать и сохранять заказ, при этом заказ должен содержать хотя бы один товар.
-    /// </summary>
+   
+    // ViewModel для управления заказами.
+    // Позволяет создавать новый заказ, добавлять в него товары через OrderProduct,
+    // редактировать и сохранять заказ, при этом заказ должен содержать хотя бы один товар.
+ 
     public class OrderViewModel : BaseViewModel
     {
         private readonly IOrderService _orderService;
         private readonly IProductService _productService;
 
-        /// <summary>
-        /// Коллекция заказов для отображения.
-        /// </summary>
+        
+        // Коллекция заказов для отображения.
+       
         public ObservableCollection<Order> Orders { get; set; } = new();
 
         private Order? _selectedOrder;
-        /// <summary>
-        /// Выбранный заказ.
-        /// </summary>
+       
+        // Выбранный заказ.
+        
         public Order? SelectedOrder
         {
             get => _selectedOrder;
@@ -57,9 +57,9 @@ namespace Warehouse.ViewModels
             LoadOrders();
         }
 
-        /// <summary>
-        /// Загружает все заказы из сервиса в коллекцию Orders.
-        /// </summary>
+        
+        // Загружает все заказы из сервиса в коллекцию Orders.
+       
         private void LoadOrders()
         {
             Orders.Clear();
@@ -69,9 +69,9 @@ namespace Warehouse.ViewModels
             }
         }
 
-        /// <summary>
-        /// Создает новый заказ с пустым списком OrderProducts.
-        /// </summary>
+       
+        // Создает новый заказ с пустым списком OrderProducts.
+        
         private void CreateOrder()
         {
             var newOrder = new Order
@@ -85,10 +85,10 @@ namespace Warehouse.ViewModels
             Orders.Add(newOrder);
         }
 
-        /// <summary>
-        /// Открывает окно выбора продукта, затем окно ввода количества для выбранного продукта.
-        /// Если все подтверждено, созданный OrderProduct добавляется в SelectedOrder.
-        /// </summary>
+        
+        // Открывает окно выбора продукта, затем окно ввода количества для выбранного продукта.
+        // Если все подтверждено, созданный OrderProduct добавляется в SelectedOrder.
+       
         private void AddProductToOrder()
         {
             if (SelectedOrder == null)
@@ -119,10 +119,10 @@ namespace Warehouse.ViewModels
             }
         }
 
-        /// <summary>
-        /// Сохраняет заказ через сервис.
-        /// Проверяет, что заказ содержит хотя бы один OrderProduct.
-        /// </summary>
+       
+        // Сохраняет заказ через сервис.
+        // Проверяет, что заказ содержит хотя бы один OrderProduct.
+       
         private void SaveOrder()
         {
             if (SelectedOrder == null)
@@ -147,17 +147,17 @@ namespace Warehouse.ViewModels
             SelectedOrder = null;
         }
 
-        /// <summary>
-        /// Проверка, что заказ можно сохранить: он не null и содержит хотя бы один товар.
-        /// </summary>
+       
+        // Проверка, что заказ можно сохранить: он не null и содержит хотя бы один товар.
+        
         private bool CanSaveOrder()
         {
             return SelectedOrder != null && SelectedOrder.OrderProducts.Count > 0;
         }
 
-        /// <summary>
-        /// Удаляет выбранный заказ.
-        /// </summary>
+      
+        // Удаляет выбранный заказ.
+      
         private void DeleteOrder()
         {
             if (SelectedOrder == null)

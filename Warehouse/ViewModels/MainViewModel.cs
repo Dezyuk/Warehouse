@@ -6,16 +6,16 @@ using Warehouse.ViewModels;   // Для ProductViewModel
 
 namespace Warehouse.ViewModels
 {
-    /// <summary>
-    /// ViewModel для главного окна.
-    /// Содержит текущий отображаемый UserControl и команды для навигации.
-    /// </summary>
+    
+    // ViewModel для главного окна.
+    // Содержит текущий отображаемый UserControl и команды для навигации.
+ 
     public class MainViewModel : BaseViewModel
     {
         private UserControl _currentView;
-        /// <summary>
-        /// Текущий отображаемый модуль.
-        /// </summary>
+     
+        // Текущий отображаемый модуль.
+     
         public UserControl CurrentView
         {
             get => _currentView;
