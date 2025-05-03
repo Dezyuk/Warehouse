@@ -18,6 +18,7 @@
             <Button Content="Просмотр"    Command="{Binding SetModeCommand}" CommandParameter="{x:Static models:TopologyMode.View}"/>
             <Button Content="Добавить"    Command="{Binding SetModeCommand}" CommandParameter="{x:Static models:TopologyMode.Add}" Margin="5,0"/>
             <Button Content="Удалить"     Command="{Binding SetModeCommand}" CommandParameter="{x:Static models:TopologyMode.Delete}" Margin="5,0"/>
+            <Button Content="Очистить"    Command="{Binding SetModeCommand}" CommandParameter="{x:Static models:TopologyMode.Сleaning}" Margin="5,0"/>
             <Button Content="Сменить тип" Command="{Binding SetModeCommand}" CommandParameter="{x:Static models:TopologyMode.ChangeType}" Margin="5,0"/>
             <Button Content="Сохранить"   Command="{Binding SaveTopologyCommand}" Margin="20,0"/>
             <Button Content="Отмена"      Command="{Binding CancelTopologyCommand}" Margin="5,0"/>

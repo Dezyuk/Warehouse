@@ -5,6 +5,7 @@
         View,
         Add,
         Delete,
-        ChangeType
+        ChangeType,
+        Сleaning
     }
 }

@@ -19,6 +19,6 @@ namespace Warehouse.Models
         public bool OrderType { get; set; }
         [NotMapped]
         public decimal TotalAmount
-            => OrderProducts.Sum(op => op.PriceAtOrder * op.Quantity);
+            => OrderProducts.Sum(op => op.PriceAtOrder);
     }
 }

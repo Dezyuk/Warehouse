@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Metrics;
 using System.Linq;
 using Warehouse.Models;
 
@@ -57,14 +58,14 @@ namespace Warehouse.Services
 
                 // 5. Новые кластеры
                 if (remaining > 0)
-                    remaining = FillNewClusters(stat.ProductId, stat.Priority, clustersPerZone, remaining, allCells);
+                    remaining = FillNewClusters(stat.ProductId, clustersPerZone, remaining, allCells);
 
                 // 6. Фолбэк одиночные
                 if (remaining > 0)
                     remaining = FillSingleCells(stat.ProductId, storageCells, remaining, allCells);
 
                 if (remaining > 0)
-                    throw new InvalidOperationException($"Не удалось разместить товар {stat.ProductId}. Осталось {remaining} шт.");
+                    continue;
             }
 
         }
@@ -205,7 +206,6 @@ namespace Warehouse.Services
 
         private int FillNewClusters(
     int productId,
-    double priority,
     List<List<List<Cell>>> clustersPerZone,
     int remaining,
     List<Cell> allCells)
@@ -356,9 +356,9 @@ namespace Warehouse.Services
                     visited.Add((nx, ny));
                 }
             }
-
             return false;
         }
 
+        
     }
 }

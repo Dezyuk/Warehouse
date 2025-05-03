@@ -50,6 +50,18 @@ namespace Warehouse.Views
                     var ch = vm.Cells.FirstOrDefault(c => c.X == x && c.Y == y);
                     if (ch != null) ch.ZoneType = vm.SelectedZoneType;
                     break;
+
+                case TopologyMode.Сleaning:
+                    var cl = vm.Cells.FirstOrDefault(c => c.X == x && c.Y == y);
+                    if (cl != null)
+                    {
+                        if (cl.Product != null)
+                        {
+                            vm.СleaningCells(cl);
+                        }
+                        
+                    }
+                    break;
             }
         }
 

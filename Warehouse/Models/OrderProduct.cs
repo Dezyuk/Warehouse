@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,6 +15,6 @@ namespace Warehouse.Models
         public Product Product { get; set; }
         public int Quantity { get; set; }
         public decimal Discount { get; set; }
-        public decimal PriceAtOrder { get; set; }
+        public decimal PriceAtOrder => Quantity * Product.Price;
     }
 }

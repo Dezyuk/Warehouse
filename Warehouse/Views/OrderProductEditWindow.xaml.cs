@@ -30,7 +30,7 @@ namespace Warehouse.Views
                 ProductId = orderProduct.ProductId,
                 Product = product,
                 Quantity = orderProduct.Quantity,
-                PriceAtOrder = orderProduct.PriceAtOrder
+                //PriceAtOrder = orderProduct.PriceAtOrder
             };
         }
 
@@ -43,7 +43,7 @@ namespace Warehouse.Views
                     Product = _selectedProduct,
                     ProductId = _selectedProduct.Id,
                     Quantity = quantity,
-                    PriceAtOrder = _selectedProduct.Price
+                    //PriceAtOrder = _selectedProduct.Price
                 };
                 DialogResult = true;
                 Close();

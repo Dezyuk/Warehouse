@@ -11,5 +11,10 @@ namespace Warehouse.Views
             InitializeComponent();
             DataContext = viewModel;
         }
+
+        private void DataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+
+        }
     }
 }

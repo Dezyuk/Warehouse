@@ -33,7 +33,7 @@ namespace Warehouse.ViewModels
         public ZoneType SelectedZoneType
         {
             get => _selectedZoneType;
-            set { _selectedZoneType = value; OnPropertyChanged(); }
+            set { _selectedZoneType = value; OnPropertyChanged(); CurrentMode = TopologyMode.Add; }
         }
 
         private List<Cell> _originalCells;
@@ -60,8 +60,8 @@ namespace Warehouse.ViewModels
             AssignedItems = new ObservableCollection<Product>();
             UnassignedItems = new ObservableCollection<Product>();
 
-            SetModeCommand = new RelayCommand<TopologyMode>(m => CurrentMode = m);
-            SetZoneTypeCommand = new RelayCommand<ZoneType>(t => { SelectedZoneType = t; CurrentMode = TopologyMode.ChangeType; });
+            SetModeCommand = new RelayCommand<TopologyMode>(m => CurrentMode = m );
+            SetZoneTypeCommand = new RelayCommand<ZoneType>(t => { SelectedZoneType = t; CurrentMode = TopologyMode.Add; });
             SaveTopologyCommand = new RelayCommand(SaveTopology);
             CancelTopologyCommand = new RelayCommand(CancelTopology);
             ArrangeAllStockCommand = new RelayCommand(ArrangeAllStock);
@@ -202,13 +202,33 @@ namespace Warehouse.ViewModels
                 MessageBox.Show("Эта ячейка уже занята другим товаром или количество превышает лимит.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
+        public void СleaningCells(Cell cell)
+        {
+            cell.FillColor = null;
+            cell.Product = null;
+            cell.ProductId = null;
+            cell.Quantity = 0;
+            _cellSvc.UpdateCell(cell);
+            Cells.Remove(cell);
+            Cells.Add(cell);
+            InitializeProducts();
+        }
+
         public void ArrangeAllStock()
         {
-            var historicalOrders = Orders.Where(o => o.OrderDate < DateTime.UtcNow.AddMonths(-1)).ToList();
 
             // Выполняем размещение
             _placementService.PlaceAllProducts();
-            // После этого Cells автоматически обновятся, и UI перерисует размещение
+
+            var updatedCells = _cellSvc.GetAllCells().ToList();
+
+            Cells.Clear();
+            foreach (var cell in updatedCells)
+                Cells.Add(cell);
+
+            // Пересчитать Assigned/Unassigned товары
+            InitializeProducts();
+            CurrentMode = TopologyMode.View;
         }
     }
 }

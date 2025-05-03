@@ -125,7 +125,7 @@ namespace Warehouse.ViewModels
 
             // Обновляем значения
             SelectedOrderProduct.Quantity = editWindow.Result.Quantity;
-            SelectedOrderProduct.PriceAtOrder = editWindow.Result.PriceAtOrder;
+            //SelectedOrderProduct.PriceAtOrder = editWindow.Result.PriceAtOrder;
             OnPropertyChanged(nameof(Invoice.OrderProducts));
         }
 

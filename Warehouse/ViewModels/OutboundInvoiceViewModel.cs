@@ -71,7 +71,7 @@ namespace Warehouse.ViewModels
             _orderService.AddOrder(Invoice);
             MessageBox.Show("Расходная накладная успешно сохранена", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
 
-            ResetInvoice("Расход");
+            ResetInvoice("Расходная накладная");
         }
     }
 }

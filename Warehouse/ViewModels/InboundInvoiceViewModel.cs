@@ -33,7 +33,7 @@ namespace Warehouse.ViewModels
             MessageBox.Show("Приходная накладная успешно сохранена", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
 
             // Сбрасываем на новую пустую накладную
-            ResetInvoice("Приход");
+            ResetInvoice("Приходная накладная");
         }
     }
 }

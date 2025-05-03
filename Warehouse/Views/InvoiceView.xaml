@@ -26,20 +26,12 @@
         </StackPanel>
 
         <!-- Таблица позиций -->
-        <DataGrid Grid.Row="1"
-                  ItemsSource="{Binding Invoice.OrderProducts}"
-                  AutoGenerateColumns="False"
-                  CanUserAddRows="False"
-                  Margin="0,0,0,10"
-                  IsReadOnly="True"
-                  SelectedItem="{Binding SelectedOrderProduct, Mode=TwoWay}">
+        <DataGrid Grid.Row="1" ItemsSource="{Binding Invoice.OrderProducts}" AutoGenerateColumns="False" CanUserAddRows="False" Margin="0,0,0,10" IsReadOnly="True" SelectedItem="{Binding SelectedOrderProduct, Mode=TwoWay}" SelectionChanged="DataGrid_SelectionChanged">
             <DataGrid.Columns>
-                <DataGridTextColumn Header="Товар"
-                                    Binding="{Binding Product.Name}" Width="*"/>
-                <DataGridTextColumn Header="Количество"
-                                    Binding="{Binding Quantity}" Width="100"/>
-                <DataGridTextColumn Header="Цена"
-                                    Binding="{Binding PriceAtOrder}" Width="100"/>
+                <DataGridTextColumn Header="Товар"      Binding="{Binding Product.Name}" Width="*"/>
+                <DataGridTextColumn Header="Количество" Binding="{Binding Quantity}" Width="100"/>
+                <DataGridTextColumn Header="Цена"       Binding="{Binding Product.Price}" Width="100"/>
+                <DataGridTextColumn Header="Сумма"      Binding="{Binding PriceAtOrder}" Width="100"/>
             </DataGrid.Columns>
         </DataGrid>
 

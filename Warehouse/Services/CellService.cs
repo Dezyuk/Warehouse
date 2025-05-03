@@ -108,10 +108,11 @@ namespace Warehouse.Services
                 }
 
                 cell.FillColor = _productColors[cell.ProductId.Value];
+                UpdateCell(cell);
             }
         }
 
-        // 🔷 Новый метод: разделение на изолированные зоны хранения
+        //  Новый метод: разделение на изолированные зоны хранения
         public List<List<Cell>> GetSeparatedStorageZones()
         {
             var allCells = _cellRepository.GetAllCells().ToList();

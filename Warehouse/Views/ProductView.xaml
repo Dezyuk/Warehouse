@@ -18,11 +18,11 @@
         <!-- Таблица для отображения списка товаров -->
         <DataGrid Grid.Row="1" ItemsSource="{Binding Products}" SelectedItem="{Binding SelectedProduct, Mode=TwoWay}" AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False">
             <DataGrid.Columns>
-                <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="50"/>
                 <DataGridTextColumn Header="Название" Binding="{Binding Name}" Width="*"/>
                 <DataGridTextColumn Header="Артикул" Binding="{Binding Article}" Width="100"/>
                 <DataGridTextColumn Header="Количество" Binding="{Binding Quantity}" Width="100"/>
                 <DataGridTextColumn Header="Цена" Binding="{Binding Price}" Width="100"/>
+                <DataGridTextColumn Header="Сумма" Binding="{Binding Total}" Width="100"/>
             </DataGrid.Columns>
         </DataGrid>
     </Grid>
