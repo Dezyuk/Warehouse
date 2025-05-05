@@ -6,32 +6,19 @@
     <Grid Margin="10">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
-            <!-- Заголовок -->
             <RowDefinition Height="*"/>
-            <!-- Таблица позиций -->
             <RowDefinition Height="Auto"/>
-            <!-- Кнопки -->
         </Grid.RowDefinitions>
 
-        <!-- Заголовок -->
-        <TextBlock Grid.Row="0" Text="Позиции в заказе" 
-                   FontWeight="Bold" FontSize="16" Margin="0,0,0,10"/>
+        <TextBlock Grid.Row="0" Text="Позиции в заказе" FontWeight="Bold" FontSize="16" Margin="0,0,0,10"/>
 
-        <!-- Таблица позиций -->
-        <DataGrid x:Name="OrderProductsDataGrid"
-                  Grid.Row="1"
-                  ItemsSource="{Binding OrderProducts}"
-                  AutoGenerateColumns="False"
-                  IsReadOnly="True"
-                  SelectedItem="{Binding SelectedOrderProduct, Mode=TwoWay}">
+        <DataGrid x:Name="OrderProductsDataGrid" Grid.Row="1" ItemsSource="{Binding OrderProducts}" AutoGenerateColumns="False" IsReadOnly="True" SelectedItem="{Binding SelectedOrderProduct, Mode=TwoWay}">
             <DataGrid.Columns>
-                <DataGridTextColumn Header="Товар" Binding="{Binding Product.Name}" Width="*"/>
-                <DataGridTextColumn Header="Количество" Binding="{Binding Quantity}" Width="100"/>
-                <DataGridTextColumn Header="Цена" Binding="{Binding Product.Price}" Width="100"/>
-                <DataGridTextColumn Header="Сумма" Binding="{Binding PriceAtOrder}" Width="100"/>
+                <DataGridTextColumn Header="Товар"      Binding="{Binding Product.Name}"  Width="*"/>
+                <DataGridTextColumn Header="Количество" Binding="{Binding Quantity}"      Width="100"/>
+                <DataGridTextColumn Header="Цена"       Binding="{Binding Product.Price}" Width="100"/>
+                <DataGridTextColumn Header="Сумма"      Binding="{Binding PriceAtOrder}"  Width="100"/>
             </DataGrid.Columns>
         </DataGrid>
-
-        
     </Grid>
 </Window>

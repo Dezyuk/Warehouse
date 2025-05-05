@@ -112,48 +112,6 @@ namespace Warehouse.Services
             }
         }
 
-        //  Новый метод: разделение на изолированные зоны хранения
-        public List<List<Cell>> GetSeparatedStorageZones()
-        {
-            var allCells = _cellRepository.GetAllCells().ToList();
-            var storageCells = allCells
-                .Where(c => c.ZoneType == ZoneType.Storage)
-                .ToList();
-
-            var visited = new HashSet<(int, int)>();
-            var zones = new List<List<Cell>>();
-
-            foreach (var cell in storageCells)
-            {
-                if (visited.Contains((cell.X, cell.Y)))
-                    continue;
-
-                var zone = new List<Cell>();
-                var queue = new Queue<Cell>();
-                queue.Enqueue(cell);
-                visited.Add((cell.X, cell.Y));
-
-                while (queue.Count > 0)
-                {
-                    var current = queue.Dequeue();
-                    zone.Add(current);
-
-                    var neighbors = storageCells.Where(c =>
-                        !visited.Contains((c.X, c.Y)) &&
-                        ((Math.Abs(c.X - current.X) == 1 && c.Y == current.Y) ||
-                         (Math.Abs(c.Y - current.Y) == 1 && c.X == current.X)));
-
-                    foreach (var neighbor in neighbors)
-                    {
-                        visited.Add((neighbor.X, neighbor.Y));
-                        queue.Enqueue(neighbor);
-                    }
-                }
-
-                zones.Add(zone);
-            }
-
-            return zones;
-        }
+       
     }
 }

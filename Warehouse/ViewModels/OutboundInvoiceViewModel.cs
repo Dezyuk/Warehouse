@@ -5,9 +5,6 @@ using Warehouse.Services;
 
 namespace Warehouse.ViewModels
 {
-    
-    // Расходная накладная — списывает остатки.
-    
     public class OutboundInvoiceViewModel : InvoiceViewModel
     {
         private readonly ICellService _cellService;
@@ -22,7 +19,6 @@ namespace Warehouse.ViewModels
 
         protected override void SaveInvoice()
         {
-            // Проверка остатков
             foreach (var op in Invoice.OrderProducts)
             {
                 var product = _productService.GetProductById(op.ProductId);
@@ -37,7 +33,6 @@ namespace Warehouse.ViewModels
                 }
             }
             string message ="";
-            // Списание из ячеек
             foreach (var op in Invoice.OrderProducts)
             {
                 try
@@ -60,7 +55,6 @@ namespace Warehouse.ViewModels
             }
             
 
-            // Обновление общего остатка товара
             foreach (var op in Invoice.OrderProducts)
             {
                 var product = _productService.GetProductById(op.ProductId)!;

@@ -10,10 +10,6 @@ using Warehouse.Views;
 
 namespace Warehouse.ViewModels
 {
-    
-    // Базовый VM для обеих накладных. Здесь объявлены команды,
-    // общий метод AddProduct, проверка CanSave и метод ResetInvoice.
-   
     public abstract class InvoiceViewModel : BaseViewModel
     {
         protected readonly IOrderService _orderService;
@@ -108,9 +104,6 @@ namespace Warehouse.ViewModels
             ((RelayCommand)SaveInvoiceCommand).RaiseCanExecuteChanged();
         }
 
-        
-        // Наследники реализуют логику сохранения (пополнение или списание остатков).
-        
         protected abstract void SaveInvoice();
 
         private void EditProduct()
@@ -123,9 +116,7 @@ namespace Warehouse.ViewModels
             var editWindow = new OrderProductEditWindow(product, SelectedOrderProduct);
             if (editWindow.ShowDialog() != true || editWindow.Result == null) return;
 
-            // Обновляем значения
             SelectedOrderProduct.Quantity = editWindow.Result.Quantity;
-            //SelectedOrderProduct.PriceAtOrder = editWindow.Result.PriceAtOrder;
             OnPropertyChanged(nameof(Invoice.OrderProducts));
         }
 

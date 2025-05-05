@@ -16,7 +16,6 @@ namespace Warehouse.Views
         }
         private void OnLoaded(object sender, RoutedEventArgs e)
         {
-            // Обновляем ячейки
             var vm = (TopologyViewModel)DataContext;
             vm.InitializeProducts();
         }
@@ -34,7 +33,6 @@ namespace Warehouse.Views
                         vm.Cells.Add(new Cell { X = x, Y = y, ZoneType = vm.SelectedZoneType });
                         vm.InitializeProducts();
                     }
-                        //vm.Cells.Add(new Cell { X = x, Y = y, ZoneType = vm.SelectedZoneType });
                     break;
 
                 case TopologyMode.Delete:
@@ -79,16 +77,16 @@ namespace Warehouse.Views
         }
         private void OnCanvasDragOver(object sender, DragEventArgs e)
         {
-            if (!e.Data.GetDataPresent("Product")) return; // Проверяем, что перетаскиваемый объект — это товар.
+            if (!e.Data.GetDataPresent("Product")) return; 
 
             var targetCell = (sender as FrameworkElement)?.Tag as Cell;
             if (targetCell != null && targetCell.ZoneType == ZoneType.Storage)
             {
-                e.Effects = DragDropEffects.Move;  // Разрешаем перемещение только в зоны хранения
+                e.Effects = DragDropEffects.Move;  
             }
             else
             {
-                e.Effects = DragDropEffects.None;  // Запрещаем перемещение в другие зоны
+                e.Effects = DragDropEffects.None;  
             }
         }
 
@@ -101,9 +99,8 @@ namespace Warehouse.Views
 
                 if (targetCell != null && product != null)
                 {
-                    // Перемещаем товар в ячейку
                     var viewModel = (TopologyViewModel)DataContext;
-                    viewModel.MoveProductToCell(targetCell, product);  // Метод из ViewModel для обновления состояния
+                    viewModel.MoveProductToCell(targetCell, product);  
                 }
             }
         }
@@ -114,14 +111,12 @@ namespace Warehouse.Views
             var listBoxItem = sender as FrameworkElement;
             if (listBoxItem == null) return;
 
-            // Извлекаем DataContext из элемента
             var product = listBoxItem.DataContext as Product;
 
             if (product != null)
             {
-                // Начать перетаскивание
                 DataObject data = new DataObject();
-                data.SetData("Product", product);  // Продукт передается как DataObject
+                data.SetData("Product", product);  
                 DragDrop.DoDragDrop(listBoxItem, data, DragDropEffects.Move);
             }
         }

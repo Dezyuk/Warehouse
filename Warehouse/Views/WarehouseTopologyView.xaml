@@ -13,7 +13,6 @@
     </UserControl.Resources>
 
     <DockPanel Margin="10">
-        <!-- режимы -->
         <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,10">
             <Button Content="Просмотр"    Command="{Binding SetModeCommand}" CommandParameter="{x:Static models:TopologyMode.View}"/>
             <Button Content="Добавить"    Command="{Binding SetModeCommand}" CommandParameter="{x:Static models:TopologyMode.Add}" Margin="5,0"/>
@@ -24,7 +23,6 @@
             <Button Content="Отмена"      Command="{Binding CancelTopologyCommand}" Margin="5,0"/>
         </StackPanel>
 
-        <!-- выбор типа -->
         <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,10"
                 Visibility="{Binding CurrentMode, Converter={StaticResource ModeToVis}, ConverterParameter=ChangeType}">
             <Button Content="Проезд"    Command="{Binding SetZoneTypeCommand}" CommandParameter="{x:Static models:ZoneType.Passage}" Margin="3,0"/>
@@ -87,9 +85,7 @@
                                 <Rectangle Width="12" Height="12" Margin="0,0,5,0" Stroke="Black" StrokeThickness="0.5">
                                     <Rectangle.Fill>
                                         <MultiBinding Converter="{StaticResource ProductToBrushConverter}">
-                                            <!-- привязываем Produkt.Id -->
                                             <Binding Path="Id"/>
-                                            <!-- привязываем всю коллекцию Cells из VM -->
                                             <Binding Path="DataContext.Cells"
                                                 RelativeSource="{RelativeSource AncestorType=UserControl}"/>
                                         </MultiBinding>

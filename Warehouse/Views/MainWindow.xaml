@@ -4,7 +4,6 @@
         xmlns:vm="clr-namespace:Warehouse.ViewModels"
         Title="Складская система" Height="600" Width="1000">
     <DockPanel>
-        <!-- Панель навигации -->
         <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Background="LightGray" Height="50">
             <Button Content="Товары" Width="120" Margin="5" Command="{Binding ShowProductsCommand}" />
             <Button Content="Приход" Width="120" Margin="5" Command="{Binding ShowInboundCommand}" />
@@ -12,7 +11,6 @@
             <Button Content="Топология" Width="120" Margin="5" Command="{Binding ShowTopologyCommand}" />
             <Button Content="История" Width="120" Margin="5" Command="{Binding ShowHistoryCommand}" />
         </StackPanel>
-        <!-- Область отображения текущего модуля -->
         <ContentControl Content="{Binding CurrentView}" />
     </DockPanel>
 </Window>

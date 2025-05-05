@@ -14,8 +14,6 @@ namespace Warehouse.Services
         public OrderService(IOrderRepository orderRepository)
         {
             _orderRepository = orderRepository;
-
-            // Инициализируем живую коллекцию из репозитория
             Orders = new ObservableCollection<Order>(
                 _orderRepository.GetAllOrders());
         }
@@ -43,8 +41,6 @@ namespace Warehouse.Services
 
             existing.CustomerName = order.CustomerName;
             existing.OrderDate = order.OrderDate;
-
-            // Обновляем позиции
             existing.OrderProducts.Clear();
             foreach (var op in order.OrderProducts)
                 existing.OrderProducts.Add(op);

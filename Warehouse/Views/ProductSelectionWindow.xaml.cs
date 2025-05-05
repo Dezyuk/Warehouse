@@ -8,22 +8,13 @@ using Warehouse.Services;
 namespace Warehouse.Views
 {
     
-    // Окно выбора товара. Загружает список товаров через IProductService и фильтрует те,
-    // которые уже выбраны (на основе списка идентификаторов), чтобы не допустить повторного выбора.
-    
     public partial class ProductSelectionWindow : Window
     {
-        // Коллекция товаров для отображения
         public ObservableCollection<Product> Products { get; set; } = new ObservableCollection<Product>();
 
         private readonly IProductService _productService;
-        // Список уже выбранных товаров (по Id), чтобы их исключить из отображения
         private readonly System.Collections.Generic.List<int> _excludedProductIds;
-
         public Product? SelectedProduct { get; private set; }
-
-        
-        // Конструктор окна.
         
         
         public ProductSelectionWindow(IProductService productService, System.Collections.Generic.List<int> excludedProductIds = null)
@@ -35,14 +26,11 @@ namespace Warehouse.Views
             DataContext = this;
         }
 
-        
-        // Загрузить список товаров, исключая те, что уже выбраны.
        
         private void LoadProducts()
         {
             Products.Clear();
             var allProducts = _productService.GetAllProducts();
-            // Фильтруем товары, если их Id содержится в _excludedProductIds
             var filtered = allProducts.Where(p => !_excludedProductIds.Contains(p.Id));
             foreach (var product in filtered)
             {
@@ -50,7 +38,6 @@ namespace Warehouse.Views
             }
         }
 
-        // При двойном клике выбираем товар
         private void ProductsList_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
             if (ProductsList.SelectedItem is Product product)
@@ -61,7 +48,6 @@ namespace Warehouse.Views
             }
         }
 
-        // При нажатии OK также выбираем товар, если выбран один из списка
         private void Ok_Click(object sender, RoutedEventArgs e)
         {
             if (ProductsList.SelectedItem is Product product)

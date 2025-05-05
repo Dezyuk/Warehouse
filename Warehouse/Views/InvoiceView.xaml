@@ -9,23 +9,17 @@
     <Grid Margin="10">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
-            <!-- Заголовок -->
             <RowDefinition Height="*"/>
-            <!-- Список позиций -->
             <RowDefinition Height="Auto"/>
-            <!-- Кнопки -->
         </Grid.RowDefinitions>
 
-        <!-- Клиент и дата -->
         <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,10">
             <TextBlock Text="Клиент:" VerticalAlignment="Center"/>
-            <TextBox Text="{Binding Invoice.CustomerName, UpdateSourceTrigger=PropertyChanged}"
-                     Width="200" Margin="5,0"/>
+            <TextBox Text="{Binding Invoice.CustomerName, UpdateSourceTrigger=PropertyChanged}" Width="200" Margin="5,0"/>
             <TextBlock Text="Дата:" VerticalAlignment="Center" Margin="20,0,0,0"/>
             <DatePicker SelectedDate="{Binding Invoice.OrderDate}" Width="150" Margin="5,0"/>
         </StackPanel>
 
-        <!-- Таблица позиций -->
         <DataGrid Grid.Row="1" ItemsSource="{Binding Invoice.OrderProducts}" AutoGenerateColumns="False" CanUserAddRows="False" Margin="0,0,0,10" IsReadOnly="True" SelectedItem="{Binding SelectedOrderProduct, Mode=TwoWay}" SelectionChanged="DataGrid_SelectionChanged">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Товар"      Binding="{Binding Product.Name}" Width="*"/>
@@ -35,23 +29,11 @@
             </DataGrid.Columns>
         </DataGrid>
 
-        <!-- Кнопки -->
         <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button Content="Добавить позицию"
-                    Command="{Binding AddProductCommand}"
-                    Margin="2"/>
-            <Button Content="{Binding SaveButtonText}"
-                    Command="{Binding SaveInvoiceCommand}"
-                    Margin="2"/>
-            <Button Content="Редактировать" 
-                        Command="{Binding EditProductCommand}"
-                        CommandParameter="{Binding}" 
-                        Margin="2"/>
-            <Button Content="Удалить" 
-                        Command="{Binding DataContext.RemoveProductCommand, 
-                                  RelativeSource={RelativeSource AncestorType=UserControl}}"
-                        CommandParameter="{Binding}" 
-                        Margin="2"/>
+            <Button Content="Добавить позицию"         Command="{Binding AddProductCommand}"  Margin="2"/>
+            <Button Content="{Binding SaveButtonText}" Command="{Binding SaveInvoiceCommand}" Margin="2"/>
+            <Button Content="Редактировать"            Command="{Binding EditProductCommand}"CommandParameter="{Binding}" Margin="2"/>
+            <Button Content="Удалить"                  Command="{Binding DataContext.RemoveProductCommand,RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}" Margin="2"/>
         </StackPanel>
     </Grid>
 </UserControl>

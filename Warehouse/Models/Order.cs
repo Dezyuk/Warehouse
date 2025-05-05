@@ -15,7 +15,6 @@ namespace Warehouse.Models
         public DateTime OrderDate { get; set; } = DateTime.UtcNow;
         public ObservableCollection<OrderProduct> OrderProducts { get; set; } = new ObservableCollection<OrderProduct>();
 
-        //true - Inbound, false - Outbound
         public bool OrderType { get; set; }
         [NotMapped]
         public decimal TotalAmount

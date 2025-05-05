@@ -9,13 +9,11 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <!-- Панель кнопок управления товарами -->
         <StackPanel Orientation="Horizontal" Grid.Row="0" HorizontalAlignment="Left">
             <Button Content="Добавить" Command="{Binding AddCommand}" Margin="5"/>
             <Button Content="Редактировать" Command="{Binding UpdateCommand}" Margin="5"/>
             <Button Content="Удалить" Command="{Binding DeleteCommand}" Margin="5"/>
         </StackPanel>
-        <!-- Таблица для отображения списка товаров -->
         <DataGrid Grid.Row="1" ItemsSource="{Binding Products}" SelectedItem="{Binding SelectedProduct, Mode=TwoWay}" AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Название" Binding="{Binding Name}" Width="*"/>

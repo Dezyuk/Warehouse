@@ -24,13 +24,11 @@ namespace Warehouse.Views
             ProductNameText.Text = product.Name;
             QuantityTextBox.Text = orderProduct.Quantity.ToString();
 
-            // Создаём копию результата для возврата
             Result = new OrderProduct
             {
                 ProductId = orderProduct.ProductId,
                 Product = product,
                 Quantity = orderProduct.Quantity,
-                //PriceAtOrder = orderProduct.PriceAtOrder
             };
         }
 
@@ -43,7 +41,6 @@ namespace Warehouse.Views
                     Product = _selectedProduct,
                     ProductId = _selectedProduct.Id,
                     Quantity = quantity,
-                    //PriceAtOrder = _selectedProduct.Price
                 };
                 DialogResult = true;
                 Close();

@@ -3,9 +3,6 @@ using Warehouse.Services;
 
 namespace Warehouse.ViewModels
 {
-    
-    // Приходная накладная — пополняет остатки.
-    
     public class InboundInvoiceViewModel : InvoiceViewModel
     {
         public InboundInvoiceViewModel(
@@ -17,7 +14,6 @@ namespace Warehouse.ViewModels
 
         protected override void SaveInvoice()
         {
-            // Увеличиваем остатки
             foreach (var op in Invoice.OrderProducts)
             {
                 var product = _productService.GetProductById(op.ProductId);
@@ -29,10 +25,7 @@ namespace Warehouse.ViewModels
             }
             Invoice.OrderType = true;
             _orderService.AddOrder(Invoice);
-            
             MessageBox.Show("Приходная накладная успешно сохранена", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
-
-            // Сбрасываем на новую пустую накладную
             ResetInvoice("Приходная накладная");
         }
     }

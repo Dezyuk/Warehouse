@@ -6,9 +6,6 @@ using Warehouse.Models;
 
 namespace Warehouse.Views.Converters
 {
-   
-    // Делает видимым элемент, когда CurrentMode == ConverterParameter (например, "ChangeType").
-  
     public class TopologyModeToVisibilityConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)

@@ -4,8 +4,6 @@ using System.Windows.Input;
 namespace Warehouse.Helper
 {
   
-    // Команда с параметром типа T.
-  
     public class RelayCommand<T> : ICommand
     {
         private readonly Action<T> _execute;

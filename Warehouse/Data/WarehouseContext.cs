@@ -21,7 +21,6 @@ namespace Warehouse.Data
         }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // Настройка связи между Order и Product через OrderProduct
             modelBuilder.Entity<OrderProduct>()
                 .HasKey(op => new { op.OrderId, op.ProductId });
 
@@ -37,17 +36,15 @@ namespace Warehouse.Data
                 .HasForeignKey(op => op.ProductId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // Настройка связи между Cell и Product
             modelBuilder.Entity<Cell>()
                 .HasOne(c => c.Product)
                 .WithMany()
                 .HasForeignKey(c => c.ProductId)
                 .OnDelete(DeleteBehavior.SetNull);
 
-            // Устанавливаем значение по умолчанию для типа зоны
             modelBuilder.Entity<Cell>()
                 .Property(c => c.ZoneType)
-                .HasConversion<int>(); // Enum сохраняем как int
+                .HasConversion<int>(); 
 
             base.OnModelCreating(modelBuilder);
         }

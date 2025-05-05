@@ -1,28 +1,22 @@
 ﻿using System.Windows.Controls;
 using System.Windows.Input;
-using Warehouse.Helper;       // RelayCommand
-using Warehouse.Views;        // UserControl-ы, которые будут переключаться
-using Warehouse.ViewModels;   // Для ProductViewModel
+using Warehouse.Helper;       
+using Warehouse.Views;        
+using Warehouse.ViewModels;   
 
 namespace Warehouse.ViewModels
 {
     
-    // ViewModel для главного окна.
-    // Содержит текущий отображаемый UserControl и команды для навигации.
  
     public class MainViewModel : BaseViewModel
     {
         private UserControl _currentView;
-     
-        // Текущий отображаемый модуль.
-     
         public UserControl CurrentView
         {
             get => _currentView;
             set { _currentView = value; OnPropertyChanged(); }
         }
 
-        // Команды для переключения между модулями.
         public ICommand ShowProductsCommand { get; }
         public ICommand ShowInboundCommand { get; }
         public ICommand ShowOutboundCommand { get; }
@@ -45,16 +39,13 @@ namespace Warehouse.ViewModels
             _outboundInvoiceViewModel = outboundInvoiceViewModel;
             _invoceHistoryViewModel = invoceHistoryViewModel;
             _topologyView = topologyView;
-            // По умолчанию отображается окно товаров с передачей зависимостей
             CurrentView = new ProductView(_productViewModel);
 
-            // Инициализация команд. При выполнении команды устанавливаем нужный UserControl.
+
             ShowProductsCommand = new RelayCommand(() => CurrentView = new ProductView(_productViewModel));
-            // Остальные команды можно добавить, если соответствующие UserControl созданы:
             ShowInboundCommand = new RelayCommand(() => CurrentView = new InvoiceView(_inboundInvoiceViewModel));
             ShowOutboundCommand = new RelayCommand(() => CurrentView = new InvoiceView(_outboundInvoiceViewModel));
             ShowHistoryCommand = new RelayCommand(() => CurrentView = new InvoiceHistoryView(_invoceHistoryViewModel));
-
             ShowTopologyCommand = new RelayCommand(() => CurrentView = new WarehouseTopologyView(_topologyView));
 
         }

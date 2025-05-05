@@ -15,19 +15,15 @@
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <!-- Название товара -->
         <TextBlock Grid.Row="0" Grid.Column="0" Text="Товар:" Margin="5" VerticalAlignment="Center"/>
         <TextBlock Grid.Row="0" Grid.Column="1" x:Name="ProductNameText" Margin="5" FontWeight="Bold" VerticalAlignment="Center"/>
 
-        <!-- Цена (только для отображения) -->
         <TextBlock Grid.Row="1" Grid.Column="0" Text="Цена:" Margin="5" VerticalAlignment="Center"/>
         <TextBlock Grid.Row="1" Grid.Column="1" x:Name="PriceText" Margin="5" VerticalAlignment="Center"/>
 
-        <!-- Количество -->
         <TextBlock Grid.Row="2" Grid.Column="0" Text="Количество:" Margin="5" VerticalAlignment="Center"/>
         <TextBox Grid.Row="2" Grid.Column="1" x:Name="QuantityTextBox" Margin="5" VerticalContentAlignment="Center"/>
 
-        <!-- Кнопки -->
         <StackPanel Grid.Row="3" Grid.ColumnSpan="2" Orientation="Horizontal" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="5">
             <Button Content="OK" Width="80" Height="25" Margin="5" Click="Confirm_Click"/>
             <Button Content="Отмена" Width="80" Height="25" Margin="5" Click="Cancel_Click"/>

@@ -11,11 +11,10 @@ namespace Warehouse.ViewModels
 {
     public class TopologyViewModel : BaseViewModel
     {
+        private const int MaxPerCell = 1000;
         private readonly ICellService _cellSvc;
         private readonly IProductService _prodSvc;
         private readonly PlacementService _placementService;
-
-
         public ObservableCollection<Cell> Cells { get; }
         public ObservableCollection<Product> Products { get; }
         public ObservableCollection<Product> AssignedItems { get; }
@@ -46,11 +45,11 @@ namespace Warehouse.ViewModels
 
         public TopologyViewModel(ICellService cellSvc, IProductService prodSvc, PlacementService placementService)
         {
+
             _cellSvc = cellSvc;
             _prodSvc = prodSvc;
             _placementService = placementService;
 
-            // загрузить из БД
             var fromDb = _cellSvc.GetAllCells().ToList();
             Cells = new ObservableCollection<Cell>(fromDb);
             Products = new ObservableCollection<Product>(_prodSvc.GetAllProducts());
@@ -73,14 +72,14 @@ namespace Warehouse.ViewModels
         {
             AssignedItems.Clear();
             UnassignedItems.Clear();
-            var all = _prodSvc.GetAllProducts();  // Получаем все товары
-            var cells = _cellSvc.GetAllCells();   // Получаем все ячейки
+            var all = _prodSvc.GetAllProducts();  
+            var cells = _cellSvc.GetAllCells();   
 
             foreach (var product in all)
             {
                 var totalQuantityInCells = cells
                     .Where(c => c.ProductId == product.Id)
-                    .Sum(c => c.Quantity);  // Суммируем количество товара в ячейках
+                    .Sum(c => c.Quantity);  
 
 
                 if (totalQuantityInCells > 0)
@@ -95,11 +94,9 @@ namespace Warehouse.ViewModels
                         OrderProducts = product.OrderProducts
                     };
                     productCopy.Quantity = totalQuantityInCells;
-                    // Если продукт есть в ячейках, добавляем его в AssignedItems с учётом количества
-                    AssignedItems.Add(productCopy);  // Добавляем в список расставленных товаров
+                    AssignedItems.Add(productCopy);
                 }
 
-                // Если остаток продукта больше нуля, он еще не расставлен и остается в UnassignedItems
                 if (product.Quantity - totalQuantityInCells > 0)
                 {
                     var productCopy = new Product
@@ -112,8 +109,7 @@ namespace Warehouse.ViewModels
                         OrderProducts = product.OrderProducts
                     };
                     productCopy.Quantity = productCopy.Quantity - totalQuantityInCells;
-                    //product.Quantity -= totalQuantityInCells;
-                    UnassignedItems.Add(productCopy);  // Добавляем в список не расставленных товаров
+                    UnassignedItems.Add(productCopy);  
                 }
                 if(product.Quantity - totalQuantityInCells < 0)
                 {
@@ -159,7 +155,6 @@ namespace Warehouse.ViewModels
 
             
             InitializeProducts();
-            // Обновляем состояние интерфейса
             CurrentMode = TopologyMode.View;
         }
 
@@ -172,19 +167,19 @@ namespace Warehouse.ViewModels
 
         public void MoveProductToCell(Cell cell, Product product)
         {
-            // Проверка типа зоны
+            // проверка типа зоны
             if (cell.ZoneType != ZoneType.Storage)
             {
                 MessageBox.Show("Можно размещать только в зонах хранения.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
-            // Если ячейка пустая, размещаем товар
+            // если ячейка пустая, размещаем товар
             if (cell.ProductId == null)
             {
                 cell.Product = product;
                 cell.ProductId = product.Id;
-                cell.Quantity = product.Quantity < 1000 ? product.Quantity : 1000; // Устанавливаем количество товара в ячейке
+                cell.Quantity = product.Quantity < MaxPerCell ? product.Quantity : MaxPerCell; // устанавливаем количество товара в ячейке
                 
                 Cells.Remove(cell);
                 Cells.Add(cell);
@@ -192,10 +187,10 @@ namespace Warehouse.ViewModels
                 InitializeProducts();
 
             }
-            // Если товар уже в ячейке, увеличиваем количество
-            else if (cell.ProductId == product.Id && cell.Quantity < 1000)
+            // если товар уже в ячейке, увеличиваем количество
+            else if (cell.ProductId == product.Id && cell.Quantity < MaxPerCell)
             {
-                cell.Quantity++; // Увеличиваем количество товара в ячейке
+                cell.Quantity = Math.Min(cell.Quantity + product.Quantity, MaxPerCell);
             }
             else
             {
@@ -216,8 +211,6 @@ namespace Warehouse.ViewModels
 
         public void ArrangeAllStock()
         {
-
-            // Выполняем размещение
             _placementService.PlaceAllProducts();
 
             var updatedCells = _cellSvc.GetAllCells().ToList();
@@ -226,7 +219,6 @@ namespace Warehouse.ViewModels
             foreach (var cell in updatedCells)
                 Cells.Add(cell);
 
-            // Пересчитать Assigned/Unassigned товары
             InitializeProducts();
             CurrentMode = TopologyMode.View;
         }

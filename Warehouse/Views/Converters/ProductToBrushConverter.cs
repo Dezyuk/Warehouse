@@ -9,8 +9,6 @@ namespace Warehouse.Views.Converters
 {
     public class ProductToBrushConverter : IMultiValueConverter
     {
-        // values[0] = Product.Id (int)
-        // values[1] = Cells (IEnumerable<Cell>)
         public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
         {
             if (values.Length < 2

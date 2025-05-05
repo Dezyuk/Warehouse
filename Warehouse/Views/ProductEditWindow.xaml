@@ -4,7 +4,6 @@
         Title="Редактирование товара" Height="180" Width="400"
         WindowStartupLocation="CenterOwner">
     <Grid Margin="10">
-        <!-- Определяем строки и столбцы для размещения элементов -->
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -17,25 +16,20 @@
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <!-- Поле для ввода названия товара -->
         <TextBlock Grid.Row="0" Grid.Column="0" Text="Название:" Margin="5" VerticalAlignment="Center"/>
         <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Margin="5"/>
 
-        <!-- Поле для ввода артикула -->
         <TextBlock Grid.Row="1" Grid.Column="0" Text="Артикул:" Margin="5" VerticalAlignment="Center"/>
         <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Article, UpdateSourceTrigger=PropertyChanged}" Margin="5"/>
 
-        <!-- Поле для ввода количества -->
         <!--
         <TextBlock Grid.Row="2" Grid.Column="0" Text="Количество:" Margin="5" VerticalAlignment="Center"/>
         <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Quantity, UpdateSourceTrigger=PropertyChanged}" Margin="5"/>
         -->
 
-        <!-- Поле для ввода цены -->
         <TextBlock Grid.Row="2" Grid.Column="0" Text="Цена:" Margin="5" VerticalAlignment="Center"/>
         <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Price, UpdateSourceTrigger=PropertyChanged}" Margin="5"/>
 
-        <!-- Панель с кнопками OK и Отмена -->
         <StackPanel Grid.Row="3" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="5">
             <Button Content="OK" Width="80" Height="20" Margin="5" IsDefault="True" Click="Ok_Click"/>
             <Button Content="Отмена" Width="80" Height="20" Margin="5" IsCancel="True" Click="Cancel_Click"/>
