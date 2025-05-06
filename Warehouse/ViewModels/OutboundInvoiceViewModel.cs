@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using System.Windows;
+using Warehouse.Helper;
 using Warehouse.Models;
 using Warehouse.Services;
 
@@ -8,13 +9,12 @@ namespace Warehouse.ViewModels
     public class OutboundInvoiceViewModel : InvoiceViewModel
     {
         private readonly ICellService _cellService;
-        public OutboundInvoiceViewModel(
-            IOrderService orderService,
-            IProductService productService,
-            ICellService cellService)
+        private readonly PdfGenerator _pdfGenerator;
+        public OutboundInvoiceViewModel( IOrderService orderService, IProductService productService, ICellService cellService, PdfGenerator pdfGenerator)
             : base(orderService, productService, initialCustomerName: "Расходная накладная")
         {
             _cellService = cellService;
+            _pdfGenerator = pdfGenerator;
         }
 
         protected override void SaveInvoice()
@@ -63,6 +63,7 @@ namespace Warehouse.ViewModels
             }
             Invoice.OrderType = false;
             _orderService.AddOrder(Invoice);
+            _pdfGenerator.GenerateAndShowInvoice(Invoice);//временый вызов для тестов
             MessageBox.Show("Расходная накладная успешно сохранена", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
 
             ResetInvoice("Расходная накладная");

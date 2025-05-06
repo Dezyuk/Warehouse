@@ -32,7 +32,7 @@
         <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right">
             <Button Content="Добавить позицию"         Command="{Binding AddProductCommand}"  Margin="2"/>
             <Button Content="{Binding SaveButtonText}" Command="{Binding SaveInvoiceCommand}" Margin="2"/>
-            <Button Content="Редактировать"            Command="{Binding EditProductCommand}"CommandParameter="{Binding}" Margin="2"/>
+            <Button Content="Редактировать"            Command="{Binding EditProductCommand}" CommandParameter="{Binding}" Margin="2"/>
             <Button Content="Удалить"                  Command="{Binding DataContext.RemoveProductCommand,RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}" Margin="2"/>
         </StackPanel>
     </Grid>

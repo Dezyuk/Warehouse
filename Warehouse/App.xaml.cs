@@ -6,6 +6,7 @@ using Warehouse.Services;
 using Warehouse.ViewModels;
 using Warehouse.Views;
 using Microsoft.EntityFrameworkCore;
+using Warehouse.Helper;
 
 namespace Warehouse
 {
@@ -34,6 +35,7 @@ namespace Warehouse
             services.AddScoped<IOrderProductRepository, OrderProductRepository>();
 
             // Регистрация сервисов
+            services.AddScoped<PdfGenerator>();
             services.AddScoped<AbcXyzService>();
             services.AddScoped<PlacementService>();
             services.AddScoped<IProductService, ProductService>();
