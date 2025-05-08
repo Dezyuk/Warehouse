@@ -47,7 +47,7 @@ namespace Warehouse.Views
             }
             else
             {
-                MessageBox.Show("Введите корректное количество.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Введіть коректну кількість.", "Помилка", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 

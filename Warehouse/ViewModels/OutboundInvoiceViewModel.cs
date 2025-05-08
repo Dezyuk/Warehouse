@@ -12,7 +12,7 @@ namespace Warehouse.ViewModels
         private readonly PdfGenerator _pdfGenerator;
         private readonly PackProductService _packProductService;
         public OutboundInvoiceViewModel( IOrderService orderService, IProductService productService, ICellService cellService, PdfGenerator pdfGenerator, PackProductService packProductService)
-            : base(orderService, productService, initialCustomerName: "Расходная накладная")
+            : base(orderService, productService, initialCustomerName: "Витратна накладна")
         {
             _cellService = cellService;
             _pdfGenerator = pdfGenerator;
@@ -27,8 +27,8 @@ namespace Warehouse.ViewModels
                 if (product == null || product.Quantity < op.Quantity)
                 {
                     MessageBox.Show(
-                        $"Недостаточно товара для списания: {op.Product?.Name}",
-                        "Ошибка",
+                        $"Недостатньо товару для списання: {op.Product?.Name}",
+                        "Помилка",
                         MessageBoxButton.OK,
                         MessageBoxImage.Error);
                     return;
@@ -44,7 +44,7 @@ namespace Warehouse.ViewModels
                 }
                 catch(InvalidOperationException e)
                 {
-                    message += $"Товар {op.Product.Name} {op.Quantity} шт.: не растовлен на складе.\n";
+                    message += $"Товар {op.Product.Name} {op.Quantity} шт.: не розставлений на складі.\n";
                     
                 }
             }
@@ -52,7 +52,7 @@ namespace Warehouse.ViewModels
             {
                 MessageBox.Show(
                         message,
-                        "Ошибка",
+                        "Помилка",
                         MessageBoxButton.OK,
                         MessageBoxImage.Warning);
             }
@@ -66,11 +66,11 @@ namespace Warehouse.ViewModels
             }
             Invoice.OrderType = false;
             _orderService.AddOrder(Invoice);
-           // _pdfGenerator.GenerateAndShowInvoice(Invoice);//временый вызов для тестов
+           _pdfGenerator.GenerateAndShowInvoice(Invoice);
             
-            MessageBox.Show("Расходная накладная успешно сохранена", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show("Витратна накладна успішно збережена", "Успіх", MessageBoxButton.OK, MessageBoxImage.Information);
 
-            ResetInvoice("Расходная накладная");
+            ResetInvoice("Витратна накладна");
         }
     }
 }

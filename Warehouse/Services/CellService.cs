@@ -76,7 +76,7 @@ namespace Warehouse.Services
             }
 
             if (toDeduct > 0)
-                throw new InvalidOperationException($"Не удалось списать {quantity} шт.: осталось {toDeduct} шт. в ячейках.");
+                throw new InvalidOperationException($"Не вдалося списати {quantity} шт.: залишилося {toDeduct} шт. в комірці.");
         }
 
         private Dictionary<int, string> _productColors = new();

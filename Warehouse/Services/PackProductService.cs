@@ -1,21 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Warehouse.Helper;
 using Warehouse.Models;
 
 namespace Warehouse.Services
 {
     public class PackProductService
     {
+        private readonly PdfGenerator _pdfGenerator;
         private const int MaxPerPallet = 1000;
         private readonly ICellService _cellService;
 
-        public PackProductService(ICellService cellService)
+        public PackProductService(ICellService cellService, PdfGenerator pdfGenerator)
         {
             _cellService = cellService;
+            _pdfGenerator = pdfGenerator;
         }
 
-        public List<Pallet> PackOrder(Order order)
+        public void PackOrder(Order order)
         {
             var pallets = new List<Pallet>();
             var productCells = GetProductCells(_cellService.GetAllCells().ToList());
@@ -32,7 +35,7 @@ namespace Warehouse.Services
 
             PackMixedPallets(remainingProducts.Where(op => op.Quantity > 0).ToList(), productCells, pallets);
 
-            return pallets;
+            _pdfGenerator.GenerateAndShowPack(pallets);
         }
 
 
@@ -130,7 +133,7 @@ namespace Warehouse.Services
                 .ToDictionary(g => g.Key, g => g.ToList());
         }
 
-        private void TryFormPerfectPallets(List<OrderProduct> orderProducts, List<Pallet> pallets) // простая но рабочая версия
+        private void TryFormPerfectPallets(List<OrderProduct> orderProducts, List<Pallet> pallets) 
         {
             foreach (var orderProduct in orderProducts.ToList())
             {

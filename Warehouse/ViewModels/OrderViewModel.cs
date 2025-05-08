@@ -60,7 +60,7 @@ namespace Warehouse.ViewModels
             var newOrder = new Order
             {
                 OrderDate = DateTime.UtcNow,
-                CustomerName = "Новый заказ"  
+                CustomerName = "Нове замовлення"  
             };
 
             SelectedOrder = newOrder;
@@ -104,7 +104,7 @@ namespace Warehouse.ViewModels
 
             if (SelectedOrder.OrderProducts.Count == 0)
             {
-                MessageBox.Show("Заказ должен содержать хотя бы один товар.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Замовлення має містити хоча б один товар.", "Помилка", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 

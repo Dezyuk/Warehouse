@@ -19,7 +19,6 @@ namespace Warehouse.Views.Converters
             }
 
             var cells = cellsEnum.Cast<Cell>();
-            // найдём первую ячейку с этим продуктом
             var cell = cells.FirstOrDefault(c => c.ProductId == productId);
             if (cell?.FillColor != null)
             {

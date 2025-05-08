@@ -131,18 +131,15 @@ namespace Warehouse.ViewModels
         private void SaveTopology()
         {
             var current = Cells.ToList();
-            // новые
             foreach (var added in current.Where(c => c.Id == 0))
                 _cellSvc.AddCell(added);
-            // обновлённые
             foreach (var upd in current.Where(c => c.Id != 0))
                 _cellSvc.UpdateCell(upd);
-            // удалённые
             foreach (var del in _originalCells.Where(o => current.All(c => c.Id != o.Id)))
                 _cellSvc.DeleteCell(del.Id);
 
             _originalCells = current.Select(Clone).ToList();
-            MessageBox.Show("Сохранено", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show("Збережено", "Успіх", MessageBoxButton.OK, MessageBoxImage.Information);
             CurrentMode = TopologyMode.View;
             InitializeProducts();
         }
@@ -167,19 +164,17 @@ namespace Warehouse.ViewModels
 
         public void MoveProductToCell(Cell cell, Product product)
         {
-            // проверка типа зоны
             if (cell.ZoneType != ZoneType.Storage)
             {
-                MessageBox.Show("Можно размещать только в зонах хранения.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Можно розміщувати тільки в зонах зберігання.", "Помилка", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
-            // если ячейка пустая, размещаем товар
             if (cell.ProductId == null)
             {
                 cell.Product = product;
                 cell.ProductId = product.Id;
-                cell.Quantity = product.Quantity < MaxPerCell ? product.Quantity : MaxPerCell; // устанавливаем количество товара в ячейке
+                cell.Quantity = product.Quantity < MaxPerCell ? product.Quantity : MaxPerCell; 
                 
                 Cells.Remove(cell);
                 Cells.Add(cell);
@@ -187,14 +182,13 @@ namespace Warehouse.ViewModels
                 InitializeProducts();
 
             }
-            // если товар уже в ячейке, увеличиваем количество
             else if (cell.ProductId == product.Id && cell.Quantity < MaxPerCell)
             {
                 cell.Quantity = Math.Min(cell.Quantity + product.Quantity, MaxPerCell);
             }
             else
             {
-                MessageBox.Show("Эта ячейка уже занята другим товаром или количество превышает лимит.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Ця комірка вже зайнята іншим товаром або кількість перевищує ліміт.", "Помилка", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
         public void СleaningCells(Cell cell)

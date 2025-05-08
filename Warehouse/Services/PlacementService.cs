@@ -46,33 +46,24 @@ namespace Warehouse.Services
 
         public void PlaceAllProducts()
         {
-            // 1. Остатки - работает 
             var toPlace = ComputeToPlace();
-
-            // 2. Зоны хранения - работает 
             var allCells = _cellService.GetAllCells().ToList();
             var storageCells = allCells.Where(c => c.ZoneType == ZoneType.Storage).ToList();
             var zones = ComputeZones(storageCells);
-
-            // 3. Кластеры в каждой зоне - работает 
             var clustersPerZone = zones
                 .Select(zone => ComputeClusters(zone, allCells))
                 .ToList();
 
-            // 4. Заполнение существующих кластеров
             foreach (var stat in _abcXyzService.ClassifyByAbcXyz(_orderService.GetAllOrders()))
             {
                 if (!toPlace.TryGetValue(stat.ProductId, out var remaining) || remaining <= 0)
                     continue;
 
-                // 4.1 Существующие кластеры - работает
                 remaining = FillExistingClusters(stat.ProductId, clustersPerZone, remaining);
 
-                // 5. Новые кластеры - работает
                 if (remaining > MaxPerCell)
                     remaining = FillNewClusters(stat.ProductId, clustersPerZone, remaining, allCells);
 
-                // 6. Фолбэк одиночные - нужно доработать
                 if (remaining > 0)
                     remaining = FillSingleCells(stat.ProductId, storageCells, remaining, allCells);
 
@@ -82,9 +73,6 @@ namespace Warehouse.Services
 
         }
 
-        
-        // Вычисляет, сколько единиц каждого товара нужно разместить,
-        // учитывая текущие заполняемые Storage ячейки и общий запас.
         
         private Dictionary<int, int> ComputeToPlace()
         {
@@ -162,7 +150,6 @@ namespace Warehouse.Services
 
             foreach (var p in allCells.Where(c => c.ZoneType == ZoneType.Passage))
             {
-                // во все 4 направлений
                 var dirs = new[] { (1, 0), (-1, 0), (0, 1), (0, -1) };
                 foreach (var (dx, dy) in dirs)
                 {
@@ -186,7 +173,6 @@ namespace Warehouse.Services
                 }
             }
 
-            // группируем ячейки в "мертвые зоны" по связности
             var deadCells = zone
                 .Where(c => !assigned.Contains((c.X, c.Y)))
                 .ToList();
@@ -222,13 +208,11 @@ namespace Warehouse.Services
 
         private int FillNewClusters(int productId,List<List<CellCluster>> clustersPerZone,int remaining, List<Cell> allCells)
         {
-            // только пустые кластеры 
             var emptyClusters = clustersPerZone
                 .SelectMany(zoneClusters => zoneClusters)
                 .Where(cluster => cluster.Cells.All(c => c.ProductId == null) && cluster.Type == ClusterType.Normal)
                 .ToList();
 
-            // ячейки зоны отгрузки
             var shippingCells = allCells
                 .Where(c => c.ZoneType == ZoneType.ShippingArea)
                 .ToList();
@@ -236,7 +220,6 @@ namespace Warehouse.Services
             int ManhattanDistance(Cell a, Cell b) =>
                 Math.Abs(a.X - b.X) + Math.Abs(a.Y - b.Y);
 
-            // сначала ближе к отгрузке
             var sortedClusters = emptyClusters
                 .Select(cluster => new
                 {
@@ -254,7 +237,7 @@ namespace Warehouse.Services
             {
                 if((int)Math.Ceiling(cluster.Cells.Count * 0.6) <= remaining/MaxPerCell)
                 {
-                    foreach (var cell in cluster.Cells.AsEnumerable().Reverse()) // от дальнего конца
+                    foreach (var cell in cluster.Cells.AsEnumerable().Reverse()) 
                     {
                         if (remaining <= 0) break;
 
@@ -328,7 +311,6 @@ namespace Warehouse.Services
             var visited = new HashSet<(int x, int y)>();
             var queue = new Queue<(int x, int y)>();
 
-            // старт из всех Passage-ячееек
             foreach (var start in allCells.Where(c => c.ZoneType == ZoneType.Passage))
             {
                 queue.Enqueue((start.X, start.Y));
@@ -361,7 +343,6 @@ namespace Warehouse.Services
                     if (neighbor == null)
                         continue;
 
-                    // пустые ячейки типа Storage
                     bool isPassable = neighbor.ZoneType == ZoneType.Storage && neighbor.ProductId == null;
                     if (!isPassable && neighbor.ZoneType != ZoneType.Passage)
                         continue;

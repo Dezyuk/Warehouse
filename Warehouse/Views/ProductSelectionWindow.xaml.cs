@@ -58,7 +58,7 @@ namespace Warehouse.Views
             }
             else
             {
-                MessageBox.Show("Выберите товар.", "Предупреждение", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Виберіть товар.", "Попередження", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
 

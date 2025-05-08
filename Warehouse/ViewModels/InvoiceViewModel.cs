@@ -51,12 +51,11 @@ namespace Warehouse.ViewModels
                 OrderProducts = new ObservableCollection<OrderProduct>()
             };
 
-            // Текст кнопки зависит от вида накладной
             SaveButtonText = initialCustomerName switch
             {
-                "Приходная накладная" => "Провести приходную накладную",
-                "Расходная накладная" => "Провести расходную накладную",
-                _ => "Сохранить"
+                "Прибуткова накладна" => "Провести прибуткову накладну",
+                "Витратна накладна" => "Провести витратну накладну",
+                _ => "Зберегти"
             };
 
             AddProductCommand = new RelayCommand(AddProduct);
@@ -90,7 +89,6 @@ namespace Warehouse.ViewModels
         private bool CanSaveInvoice() => Invoice.OrderProducts.Any();
 
         
-        // Сбрасывает накладную на новую пустую с тем же именем.
         
         protected void ResetInvoice(string customerName)
         {

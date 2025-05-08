@@ -94,8 +94,8 @@ namespace Warehouse.ViewModels
                 return;
 
             var result = System.Windows.MessageBox.Show(
-                $"Удалить продукт \"{SelectedProduct.Name}\"?",
-                "Подтверждение удаления",
+                $"Видалити продукт \"{SelectedProduct.Name}\"?",
+                "Підтвердження видалення",
                 System.Windows.MessageBoxButton.YesNo,
                 System.Windows.MessageBoxImage.Warning);
 

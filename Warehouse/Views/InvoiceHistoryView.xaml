@@ -9,9 +9,9 @@
     <Grid Margin="10">
         <DataGrid ItemsSource="{Binding Orders}" SelectedItem="{Binding SelectedOrder, Mode=TwoWay}" AutoGenerateColumns="False" IsReadOnly="True" MouseDoubleClick="DataGrid_MouseDoubleClick">
             <DataGrid.Columns>
-                <DataGridTextColumn Header="Накладная" Binding="{Binding CustomerName}"                             Width="*"/>
+                <DataGridTextColumn Header="Накладна" Binding="{Binding CustomerName}"                             Width="*"/>
                 <DataGridTextColumn Header="Дата"      Binding="{Binding OrderDate, StringFormat=dd.MM.yyyy HH:mm}" Width="150"/>
-                <DataGridTextColumn Header="Сумма"     Binding="{Binding TotalAmount}"                              Width="100"/>
+                <DataGridTextColumn Header="Сума"     Binding="{Binding TotalAmount}"                              Width="100"/>
             </DataGrid.Columns>
         </DataGrid>
     </Grid>

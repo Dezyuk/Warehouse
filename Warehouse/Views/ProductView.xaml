@@ -10,17 +10,17 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <StackPanel Orientation="Horizontal" Grid.Row="0" HorizontalAlignment="Left">
-            <Button Content="Добавить" Command="{Binding AddCommand}" Margin="5"/>
-            <Button Content="Редактировать" Command="{Binding UpdateCommand}" Margin="5"/>
-            <Button Content="Удалить" Command="{Binding DeleteCommand}" Margin="5"/>
+            <Button Content="Додати" Command="{Binding AddCommand}" Margin="5"/>
+            <Button Content="Редагувати" Command="{Binding UpdateCommand}" Margin="5"/>
+            <Button Content="Видалити" Command="{Binding DeleteCommand}" Margin="5"/>
         </StackPanel>
         <DataGrid Grid.Row="1" ItemsSource="{Binding Products}" SelectedItem="{Binding SelectedProduct, Mode=TwoWay}" AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False">
             <DataGrid.Columns>
-                <DataGridTextColumn Header="Название" Binding="{Binding Name}" Width="*"/>
+                <DataGridTextColumn Header="Назва" Binding="{Binding Name}" Width="*"/>
                 <DataGridTextColumn Header="Артикул" Binding="{Binding Article}" Width="100"/>
-                <DataGridTextColumn Header="Количество" Binding="{Binding Quantity}" Width="100"/>
-                <DataGridTextColumn Header="Цена" Binding="{Binding Price}" Width="100"/>
-                <DataGridTextColumn Header="Сумма" Binding="{Binding Total}" Width="100"/>
+                <DataGridTextColumn Header="Кількість" Binding="{Binding Quantity}" Width="100"/>
+                <DataGridTextColumn Header="Ціна" Binding="{Binding Price}" Width="100"/>
+                <DataGridTextColumn Header="Сума" Binding="{Binding Total}" Width="100"/>
             </DataGrid.Columns>
         </DataGrid>
     </Grid>

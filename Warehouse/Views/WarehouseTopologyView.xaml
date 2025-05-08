@@ -14,21 +14,21 @@
 
     <DockPanel Margin="10">
         <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,10">
-            <Button Content="Просмотр"    Command="{Binding SetModeCommand}" CommandParameter="{x:Static models:TopologyMode.View}"/>
-            <Button Content="Добавить"    Command="{Binding SetModeCommand}" CommandParameter="{x:Static models:TopologyMode.Add}" Margin="5,0"/>
-            <Button Content="Удалить"     Command="{Binding SetModeCommand}" CommandParameter="{x:Static models:TopologyMode.Delete}" Margin="5,0"/>
-            <Button Content="Очистить"    Command="{Binding SetModeCommand}" CommandParameter="{x:Static models:TopologyMode.Сleaning}" Margin="5,0"/>
-            <Button Content="Сменить тип" Command="{Binding SetModeCommand}" CommandParameter="{x:Static models:TopologyMode.ChangeType}" Margin="5,0"/>
-            <Button Content="Сохранить"   Command="{Binding SaveTopologyCommand}" Margin="20,0"/>
-            <Button Content="Отмена"      Command="{Binding CancelTopologyCommand}" Margin="5,0"/>
+            <Button Content="Перегляд"    Command="{Binding SetModeCommand}" CommandParameter="{x:Static models:TopologyMode.View}"/>
+            <Button Content="Додати"    Command="{Binding SetModeCommand}" CommandParameter="{x:Static models:TopologyMode.Add}" Margin="5,0"/>
+            <Button Content="Видалити"     Command="{Binding SetModeCommand}" CommandParameter="{x:Static models:TopologyMode.Delete}" Margin="5,0"/>
+            <Button Content="Очистити"    Command="{Binding SetModeCommand}" CommandParameter="{x:Static models:TopologyMode.Сleaning}" Margin="5,0"/>
+            <Button Content="Змінити тип" Command="{Binding SetModeCommand}" CommandParameter="{x:Static models:TopologyMode.ChangeType}" Margin="5,0"/>
+            <Button Content="Зберегти"   Command="{Binding SaveTopologyCommand}" Margin="20,0"/>
+            <Button Content="Скасувати"      Command="{Binding CancelTopologyCommand}" Margin="5,0"/>
         </StackPanel>
 
         <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,10"
                 Visibility="{Binding CurrentMode, Converter={StaticResource ModeToVis}, ConverterParameter=ChangeType}">
-            <Button Content="Проезд"    Command="{Binding SetZoneTypeCommand}" CommandParameter="{x:Static models:ZoneType.Passage}" Margin="3,0"/>
+            <Button Content="Проїзд"    Command="{Binding SetZoneTypeCommand}" CommandParameter="{x:Static models:ZoneType.Passage}" Margin="3,0"/>
             <Button Content="Склад"     Command="{Binding SetZoneTypeCommand}" CommandParameter="{x:Static models:ZoneType.Storage}" Margin="3,0"/>
-            <Button Content="Отгрузка"  Command="{Binding SetZoneTypeCommand}" CommandParameter="{x:Static models:ZoneType.ShippingArea}" Margin="3,0"/>
-            <Button Content="Приём"     Command="{Binding SetZoneTypeCommand}" CommandParameter="{x:Static models:ZoneType.ReceivingArea}" Margin="3,0"/>
+            <Button Content="Відвантаження"  Command="{Binding SetZoneTypeCommand}" CommandParameter="{x:Static models:ZoneType.ShippingArea}" Margin="3,0"/>
+            <Button Content="Прийом"     Command="{Binding SetZoneTypeCommand}" CommandParameter="{x:Static models:ZoneType.ReceivingArea}" Margin="3,0"/>
         </StackPanel>
 
         <Grid>
@@ -76,7 +76,7 @@
             </ScrollViewer>
 
             <StackPanel Grid.Column="1" Margin="10,0,0,0">
-                <TextBlock Text="В ячейках:" FontWeight="Bold"/>
+                <TextBlock Text="В комірках:" FontWeight="Bold"/>
                 <ListBox ItemsSource="{Binding AssignedItems}">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
@@ -99,7 +99,7 @@
                         </DataTemplate>
                     </ListBox.ItemTemplate>
                 </ListBox>
-                <TextBlock Text="Не расставлены:" FontWeight="Bold" Margin="0,10,0,0"/>
+                <TextBlock Text="Не розміщені:" FontWeight="Bold" Margin="0,10,0,0"/>
                 <ListBox ItemsSource="{Binding UnassignedItems}">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
@@ -111,7 +111,7 @@
                         </DataTemplate>
                     </ListBox.ItemTemplate>
                 </ListBox>
-                <Button Content="Разместить товары"
+                <Button Content="Розмістити товари"
                         Command="{Binding ArrangeAllStockCommand}" 
                         Margin="0,10"/>
             </StackPanel>

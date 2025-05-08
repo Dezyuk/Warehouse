@@ -2,14 +2,14 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="clr-namespace:Warehouse.ViewModels"
-        Title="Складская система" Height="600" Width="1000">
+        Title="Складська система" Height="600" Width="1000">
     <DockPanel>
         <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Background="LightGray" Height="50">
-            <Button Content="Товары" Width="120" Margin="5" Command="{Binding ShowProductsCommand}" />
-            <Button Content="Приход" Width="120" Margin="5" Command="{Binding ShowInboundCommand}" />
-            <Button Content="Расход" Width="120" Margin="5" Command="{Binding ShowOutboundCommand}" />
-            <Button Content="Топология" Width="120" Margin="5" Command="{Binding ShowTopologyCommand}" />
-            <Button Content="История" Width="120" Margin="5" Command="{Binding ShowHistoryCommand}" />
+            <Button Content="Товари" Width="120" Margin="5" Command="{Binding ShowProductsCommand}" />
+            <Button Content="Прибуткова накладна" Width="140" Margin="5" Command="{Binding ShowInboundCommand}" />
+            <Button Content="Витратна накладна" Width="140" Margin="5" Command="{Binding ShowOutboundCommand}" />
+            <Button Content="Топологія" Width="120" Margin="5" Command="{Binding ShowTopologyCommand}" />
+            <Button Content="Історія" Width="120" Margin="5" Command="{Binding ShowHistoryCommand}" />
         </StackPanel>
         <ContentControl Content="{Binding CurrentView}" />
     </DockPanel>
