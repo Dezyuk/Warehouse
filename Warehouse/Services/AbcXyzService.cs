@@ -11,6 +11,12 @@ namespace Warehouse.Services
         private const decimal AbcThresholdB = 0.90m;
         private const decimal XyzThresholdX = 0.10m;
         private const decimal XyzThresholdY = 0.25m;
+        private readonly IProductService _productService;
+
+        public AbcXyzService(IProductService productService)
+        {
+            _productService = productService;
+        }
 
         public List<ProductSalesStats> ClassifyByAbcXyz(IEnumerable<Order> orders)
         {
@@ -49,7 +55,24 @@ namespace Warehouse.Services
                     StdDev = stdDev
                 });
             }
-
+            var allProducts = _productService.GetAllProducts();
+            var productIdsWithStats = stats.Select(s => s.ProductId).ToHashSet();
+            foreach (var product in allProducts)
+            {
+                if (!productIdsWithStats.Contains(product.Id))
+                {
+                    stats.Add(new ProductSalesStats
+                    {
+                        ProductId = product.Id,
+                        TotalQty = 0,
+                        Mean = 0,
+                        StdDev = 0,
+                        AbcClass = Abc.C,
+                        XyzClass = Xyz.Z,
+                        Priority = 33
+                    });
+                }
+            }
             CalculateAbcClasses(stats);
             CalculateXyzClasses(stats);
             CalculatePriorities(stats);

@@ -35,6 +35,7 @@ namespace Warehouse
             services.AddScoped<IOrderProductRepository, OrderProductRepository>();
 
             // Регистрация сервисов
+            services.AddScoped<PackProductService>();
             services.AddScoped<PdfGenerator>();
             services.AddScoped<AbcXyzService>();
             services.AddScoped<PlacementService>();
@@ -50,7 +51,7 @@ namespace Warehouse
             services.AddSingleton<InboundInvoiceViewModel>();
             services.AddSingleton<MainViewModel>();
             services.AddSingleton<InvoiceHistoryViewModel>();
-            services.AddSingleton<TopologyViewModel>();
+            services.AddScoped<TopologyViewModel>();
 
 
             // Регистрация окон / UserControl-ов
